@@ -1,0 +1,1305 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>お買い物アプリ|セシール</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="Cecile Inc">
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="/static/css/common.css?v=0001">
+  <script src="/static/js/common.js"></script>
+</head>
+<body>
+  <div id="wait">
+    <img src="/static/photos/logo.png">
+  </div>
+  <div id="contents" style="display:none;">
+    <header>
+      <div class="searcharea">
+        <form method="get" id="frmEnterKeyForHeader" action="https://www.cecile.co.jp/search-results/go">
+          <div class="searchitem">
+            <select name="af">
+              <option value="">全ての商品</option>
+              <option value="cat1:0ld">レディースファッション</option>
+              <option value="cat1:0in">女性下着</option>
+              <option value="cat1:0mn">メンズファッション</option>
+              <option value="cat1:0un">メンズ下着</option>
+              <option value="cat1:0uf">事務服・作業服・白衣</option>
+              <option value="cat1:0sc">制服・学生服</option>
+              <option value="cat1:0fs">ファッション・下着すべて</option>
+              <option value="cat1:0fn">家具・収納</option>
+              <option value="cat1:0bd">寝具・ベッド</option>
+              <option value="cat1:0ct">カーテン・ラグ・ファブリック</option>
+              <option value="cat1:0lf">キッチン・雑貨・日用品</option>
+              <option value="cat1:0bt">美容・健康・サプリメント</option>
+            </select>
+          </div>
+          <div class="searchitem search-txt">
+            <input name="w" id="q" type="text" value="" maxlength="130" autocomplete="off" data-provide="rac" onkeydown="" placeholder="キーワードを入力" >
+          </div>
+          <div class="searchitem btn">
+            <i class="material-icons submit">search</i>
+          </div>
+        </form>
+      </div>
+      <div class="settings">
+        <a href="settings"><i class="material-icons submit">settings</i></a>
+      </div>
+    </header>
+    <div class="container">
+      <div class="swiper-container key-visual-slider">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="https://www.cecile.co.jp/component/img/banner/1338_772/ts_uchista_1338_772_210716.jpg" alt=""><p>今年はパジャマビューイング！涼しく快適にスポーツ観戦をしよう！</p></div>
+          <div class="swiper-slide"><img src="https://www.cecile.co.jp/component/img/banner/1338_772/maease_1338_772_200313.jpg" alt=""><p>脇の汗ジミ・汗ムレ対策でおしゃれに自信を</p></div>
+          <div class="swiper-slide"><img src="https://www.cecile.co.jp/component/img/banner/1338_772/towel_ts_1338_772_210715.jpg" alt=""><p>毎日使うタオル・スリッパ・バスマットをお得な価格で手に入れるチャンス！</p></div>
+          <div class="swiper-slide"><img src="https://www.cecile.co.jp/component/img/banner/1338_772/goodprice_1338_772_200512.jpg" alt=""><p>価格も品質も満足したい！こだわりの高見えアイテムをご紹介</p></div>
+          <div class="swiper-slide"><img src="https://www.cecile.co.jp/component/img/banner/1338_772/men_souen_1338_772_210715.jpg" alt=""><p>暑くなる季節におすすめのアイテムがお得に！</p></div>
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+      </div>
+      <div class="title nb">人気ランキング</div>
+
+      <div class="swiper-container js-swiper-category">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide item-slider"> <span class="btn-category">
+            レディース</span> </div>
+          <div class="swiper-slide item-slider"> <span class="btn-category">
+            インナー・下着</span> </div>
+          <div class="swiper-slide item-slider"> <span class="btn-category">
+            メンズ</span> </div>
+          <div class="swiper-slide item-slider"> <span class="btn-category">
+            寝具・インテリア・雑貨</span> </div>
+          <div class="swiper-slide item-slider"> <span class="btn-category">
+            美容・健康</span> </div>
+          <div class="swiper-slide item-slider"> <span class="btn-category">
+            制服・スクール</span> </div>
+          <div class="swiper-slide item-slider"> <span class="btn-category">
+            事務服・白衣</span> </div>
+          <div class="swiper-slide item-slider"> <span class="btn-category">
+            大きいサイズ</span> </div>
+        </div>
+        <div class="swiper-ranking-button-prev"></div>
+        <div class="swiper-ranking-button-next"></div>
+      </div>
+
+      <ul class="grid ranking box-0 is-active">
+        <li>
+          <p class="rank">1</p>
+          <a href="https://www.cecile.co.jp/detail/NB-6631">
+            <img src="https://www.cecile.co.jp/cmdty/img/11127/thumb/230/11127NB-6631.jpg">
+            <p>【NET限定】フロントタックチュニック</p>
+            <p><span>1,500円</span></p>
+          </a>
+        <li>
+          <p class="rank">2</p>
+          <a href="https://www.cecile.co.jp/detail/MP-2539">
+            <img src="https://www.cecile.co.jp/cmdty/img/11127/thumb/230/11127MP-2539.jpg">
+            <p>【NET限定】リラクシングハーフパンツ</p>
+            <p><span>1,500円</span></p>
+          </a>
+        <li>
+          <p class="rank">3</p>
+          <a href="https://www.cecile.co.jp/detail/NB-6633">
+            <img src="https://www.cecile.co.jp/cmdty/img/11127/thumb/230/11127NB-6633.jpg">
+            <p>【NET限定】ティアードマキシキャミソールワンピース</p>
+            <p><span>1,500円</span></p>
+          </a>
+        <li>
+          <p class="rank">4</p>
+          <a href="https://www.cecile.co.jp/detail/YG-2000">
+            <img src="https://www.cecile.co.jp/cmdty/img/13301/thumb/230/13301YG-2000.jpg">
+            <p>人工毛地肌付きフルウィッグ<美活計画></p>
+            <p><span>9,890円</span></p>
+          </a>
+        <li>
+          <p class="rank">5</p>
+          <a href="https://www.cecile.co.jp/sc/cool/">
+            <img src="https://www.cecile.co.jp/cmdty/img/11127/thumb/230/11127NB-6604.jpg">
+            <p>【NET限定】カットジョーゼットジャンスカ</p>
+            <p><span>1,500円</span></p>
+          </a>
+        <li>
+          <p class="rank">6</p>
+          <a href="https://www.cecile.co.jp/detail/RF-2130">
+            <img src="https://www.cecile.co.jp/cmdty/img/14102/thumb/230/14102RF-2130.jpg">
+            <p>ローカットスニーカー/内側トリコットメッシュ</p>
+            <p><span>2,190円</span></p>
+          </a>
+        <li>
+          <p class="rank">7</p>
+          <a href="https://www.cecile.co.jp/detail/HS-378">
+            <img src="https://www.cecile.co.jp/cmdty/img/15306/thumb/230/15306HS-378.jpg">
+            <p>パンジー レインブーツ レインステップ4906 (防水加工) (抗菌(中敷)) (ワイズ3E相当)</p>
+            <p><span>3,630円</span></p>
+          </a>
+        <li>
+          <p class="rank">8</p>
+          <a href="https://www.cecile.co.jp/detail/WF-4948">
+            <img src="https://www.cecile.co.jp/cmdty/img/14204/thumb/230/14204WF-4948.jpg">
+            <p>スキミング防止通帳ポーチ(スマートキー対応)</p>
+            <p><span>1,990円</span></p>
+          </a>
+        <li>
+          <p class="rank">9</p>
+          <a href="https://www.cecile.co.jp/detail/AC-1793">
+            <img src="https://www.cecile.co.jp/cmdty/img/11116/512/11116AC-1793_E1.jpg">
+            <p>フーデッドシアーロングコート</p>
+            <p><span>3,294円</span></p>
+          </a>
+      </ul>
+      <div class="allview ranking ranking-0 is-active">
+        <a href="https://www.cecile.co.jp/sc/ranking/lady/">
+          <div>人気ランキングの続きはこちら</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+
+      <ul class="grid ranking box-1">
+        <li>
+          <p class="rank">1</p>
+          <a href="https://www.cecile.co.jp/detail/EF-394">
+            <img src="https://www.cecile.co.jp/cmdty/img/15101/thumb/512/15101EF-394.jpg">
+            <p>完全無縫製&reg;ショーツ(GUNZE・KIREILABO)</p>
+            <p><span>540円</span></p>
+          </a>
+        <li>
+          <p class="rank">2</p>
+          <a href="https://www.cecile.co.jp/detail/PR-232">
+            <img src="https://www.cecile.co.jp/cmdty/img/15101/thumb/512/15101PR-232.jpg">
+            <p>パンティストッキング・同色5足組(静電気防止加工・抗菌防臭・つま先補強・日本製)</p>
+            <p><span>1,500円</span></p>
+          </a>
+        <li>
+          <p class="rank">3</p>
+          <a href="https://www.cecile.co.jp/detail/NI-265">
+            <img src="https://www.cecile.co.jp/cmdty/img/15101/thumb/512/15101NI-265.jpg">
+            <p>綿100%カプリ丈ルームパンツ(無地・膝下丈)</p>
+            <p><span>1,490円</span></p>
+          </a>
+        <li>
+          <p class="rank">4</p>
+          <a href="https://www.cecile.co.jp/detail/BH-394">
+            <img src="https://www.cecile.co.jp/cmdty/img/15101/thumb/512/15101BH-394.jpg">
+            <p>ブラジャー&ショーツペア(花刺しゅうレース)(ソフトワイヤー入り・3/4カップ)</p>
+            <p><span>1,000円</span></p>
+          </a>
+        <li>
+          <p class="rank">5</p>
+          <a href="https://www.cecile.co.jp/detail/UE-572">
+            <img src="https://www.cecile.co.jp/cmdty/img/13116/thumb/512/13116UE-572.jpg">
+            <p>スマートドライ&reg; 汗取りパッド付きノースリーブ(前汗キャッチャー&reg;)</p>
+            <p><span>1,420円</span></p>
+          </a>
+        <li>
+          <p class="rank">6</p>
+          <a href="https://www.cecile.co.jp/detail/BA-199">
+            <img src="https://www.cecile.co.jp/cmdty/img/15101/thumb/512/15101BA-199.jpg">
+            <p>内向きバストのスレンダーフィット&reg;ブラ(ワイヤー入り・3/4カップ)</p>
+            <p><span>2,190円</span></p>
+          </a>
+        <li>
+          <p class="rank">7</p>
+          <a href="https://www.cecile.co.jp/detail/LS-456">
+            <img src="https://www.cecile.co.jp/cmdty/img/15101/thumb/512/15101LS-456.jpg">
+            <p>人気のシンプルスリップ(吸汗速乾・静電気防止)(選べる3丈)</p>
+            <p><span>1,750円</span></p>
+          </a>
+        <li>
+          <p class="rank">8</p>
+          <a href="https://www.cecile.co.jp/detail/GL-486">
+            <img src="https://www.cecile.co.jp/cmdty/img/15101/thumb/512/15101GL-486.jpg">
+            <p>涼ぴた&reg;ロングガードル(ミディアムタイプ(股下約16cm))</p>
+            <p><span>1,750円</span></p>
+          </a>
+        <li>
+          <p class="rank">9</p>
+          <a href="https://www.cecile.co.jp/detail/SK-365">
+            <img src="https://www.cecile.co.jp/cmdty/img/15101/thumb/512/15101SK-365.jpg">
+            <p>おやすみ着圧ハイソックス(アシスキット&reg;)(日本製)</p>
+            <p><span>980円</span></p>
+          </a>
+      </ul>
+      <div class="allview ranking ranking-1">
+        <a href="https://www.cecile.co.jp/sc/ranking/inner/">
+          <div>人気ランキングの続きはこちら</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+
+      <ul class="grid ranking box-2">
+        <li>
+          <p class="rank">1</p>
+          <a href="https://www.cecile.co.jp/detail/KT-415">
+            <img src="https://www.cecile.co.jp/cmdty/img/15123/thumb/512/15123KT-415.jpg">
+            <p>綿100%ニットトランクス(前開き)</p>
+            <p><span>730円</span></p>
+          </a>
+        <li>
+          <p class="rank">2</p>
+          <a href="https://www.cecile.co.jp/detail/JP-881">
+            <img src="https://www.cecile.co.jp/cmdty/img/15123/thumb/512/15123JP-881.jpg">
+            <p>ドライ・ストレッチ・テーパードジーンズ/パンツリサーチ該当商品</p>
+            <p><span>3,300円</span></p>
+          </a>
+        <li>
+          <p class="rank">3</p>
+          <a href="https://www.cecile.co.jp/detail/JK-271">
+            <img src="https://www.cecile.co.jp/cmdty/img/15123/thumb/512/15123JK-271.jpg">
+            <p>ドライ半袖ポロシャツ/抗菌防臭・UVカット機能付き</p>
+            <p><span>1,640円</span></p>
+          </a>
+        <li>
+          <p class="rank">4</p>
+          <a href="https://www.cecile.co.jp/detail/NM-1264">
+            <img src="https://www.cecile.co.jp/cmdty/img/15123/thumb/512/15123NM-1264.jpg">
+            <p>しじら長袖パジャマ</p>
+            <p><span>3,300円</span></p>
+          </a>
+        <li>
+          <p class="rank">5</p>
+          <a href="https://www.cecile.co.jp/detail/KT-410">
+            <img src="https://www.cecile.co.jp/cmdty/img/14103/thumb/512/14103KT-410.jpg">
+            <p>男の綿100%テコパン・7分ロンパン(前開きステテコ)</p>
+            <p><span>1,290円</span></p>
+          </a>
+        <li>
+          <p class="rank">6</p>
+          <a href="https://www.cecile.co.jp/detail/SM-430">
+            <img src="https://www.cecile.co.jp/cmdty/img/15123/thumb/512/15123SM-430.jpg">
+            <p>ワーキングソックス・5足組</p>
+            <p><span>1,090円</span></p>
+          </a>
+        <li>
+          <p class="rank">7</p>
+          <a href="https://www.cecile.co.jp/detail/JE-846">
+            <img src="https://www.cecile.co.jp/cmdty/img/15126/thumb/512/15126JE-846.jpg">
+            <p>綿100%パナマ織りボーダー柄シャツパーカ</p>
+            <p><span>4,290円</span></p>
+          </a>
+        <li>
+          <p class="rank">8</p>
+          <a href="https://www.cecile.co.jp/detail/RB-551">
+            <img src="https://www.cecile.co.jp/cmdty/img/15123/thumb/512/15123RB-551.jpg">
+            <p>日本製・本革ビジカジシューズ(リナシャンテバレンチノ)/はっ水・抗菌防臭</p>
+            <p><span>9,890円</span></p>
+          </a>
+        <li>
+          <p class="rank">9</p>
+          <a href="https://www.cecile.co.jp/detail/JR-793">
+            <img src="https://www.cecile.co.jp/cmdty/img/15123/thumb/512/15123JR-793.jpg">
+            <p>ワンタッチフォーマルネクタイ/冠婚葬祭・礼服・喪服</p>
+            <p><span>2,190円</span></p>
+          </a>
+      </ul>
+      <div class="allview ranking ranking-2">
+        <a href="https://www.cecile.co.jp/sc/ranking/men/">
+          <div>人気ランキングの続きはこちら</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+
+      <ul class="grid ranking box-3">
+        <li>
+          <p class="rank">1</p>
+          <a href="https://www.cecile.co.jp/detail/CF-750">
+            <img src="https://www.cecile.co.jp/cmdty/img/15213/thumb/512/15213CF-750.jpg">
+            <p>タオル(オーガニックコットン格子柄・4枚組)/はさみで切ってもほつれない(格子ライン上をカット)</p>
+            <p><span>790円</span></p>
+          </a>
+        <li>
+          <p class="rank">2</p>
+          <a href="https://www.cecile.co.jp/detail/TG-341">
+            <img src="https://www.cecile.co.jp/cmdty/img/15213/thumb/512/15213TG-341.jpg">
+            <p>水だけで落ちるバスブラシ</p>
+            <p><span>1,690円</span></p>
+          </a>
+        <li>
+          <p class="rank">3</p>
+          <a href="https://www.cecile.co.jp/detail/WF-3868">
+            <img src="https://www.cecile.co.jp/cmdty/img/15213/thumb/512/15213WF-3868.jpg">
+            <p>珪藻土(けいそうど)水切りオプション/箸立て・ツール スタンド・グラススタンド・包丁スタンド</p>
+            <p><span>1,890円</span></p>
+          </a>
+        <li>
+          <p class="rank">4</p>
+          <a href="https://www.cecile.co.jp/detail/CG-202">
+            <img src="https://www.cecile.co.jp/cmdty/img/15213/thumb/512/15213CG-202.jpg">
+            <p>【単品販売】スリッパ・トイレペーパーホルダーカバー</p>
+            <p><span>990円</span></p>
+          </a>
+        <li>
+          <p class="rank">5</p>
+          <a href="https://www.cecile.co.jp/detail/CP-343">
+            <img src="https://www.cecile.co.jp/cmdty/img/15213/thumb/512/15213CP-343.jpg">
+            <p>レースカフェカーテン(目隠し・UVカット・防炎)</p>
+            <p><span>1,090円</span></p>
+          </a>
+        <li>
+          <p class="rank">6</p>
+          <a href="https://www.cecile.co.jp/detail/XI-1431">
+            <img src="https://www.cecile.co.jp/cmdty/img/15213/thumb/512/15213XI-1431.jpg">
+            <p>すのこ型吸湿マット「エアージョブ&reg;」</p>
+            <p><span>8,990円</span></p>
+          </a>
+        <li>
+          <p class="rank">7</p>
+          <a href="https://www.cecile.co.jp/detail/CB-407">
+            <img src="https://www.cecile.co.jp/cmdty/img/15213/thumb/512/15213CB-407.jpg">
+            <p>おくだけ吸着タイルマット/フリーカット 洗濯機可</p>
+            <p><span>2,790円</span></p>
+          </a>
+        <li>
+          <p class="rank">8</p>
+          <a href="https://www.cecile.co.jp/detail/CZ-1009">
+            <img src="https://www.cecile.co.jp/cmdty/img/14201/thumb/512/14201CZ-1009.jpg">
+            <p>ひんやりパッドシーツ(スマートドライ&reg;)/接触冷感生地・調湿機能わた使用</p>
+            <p><span>3,590円</span></p>
+          </a>
+        <li>
+          <p class="rank">9</p>
+          <a href="https://www.cecile.co.jp/detail/WG-31">
+            <img src="https://www.cecile.co.jp/cmdty/img/15213/thumb/512/15213WG-31.jpg">
+            <p>丸洗いできる軽量サボシューズ</p>
+            <p><span>1,390円</span></p>
+          </a>
+      </ul>
+      <div class="allview ranking ranking-3">
+        <a href="https://www.cecile.co.jp/sc/ranking/living/">
+          <div>人気ランキングの続きはこちら</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+
+      <ul class="grid ranking box-4">
+        <li>
+          <p class="rank">1</p>
+          <a href="https://www.cecile.co.jp/detail/HL-88">
+            <img src="https://www.cecile.co.jp/cmdty/img/15306/thumb/512/15306HL-88.jpg">
+            <p>リアルサプリ サラシア</p>
+            <p><span>780円</span></p>
+          </a>
+        <li>
+          <p class="rank">2</p>
+          <a href="https://www.cecile.co.jp/detail/WF-3808">
+            <img src="https://www.cecile.co.jp/cmdty/img/14204/thumb/512/14204WF-3808.jpg">
+            <p>匠の技 オールステンレス製足用つめきり</p>
+            <p><span>2,000円</span></p>
+          </a>
+        <li>
+          <p class="rank">3</p>
+          <a href="https://www.cecile.co.jp/detail/YG-2000">
+            <img src="https://www.cecile.co.jp/cmdty/img/13301/thumb/512/13301YG-2000.jpg">
+            <p>人工毛地肌付きフルウィッグ<美活計画></p>
+            <p><span>9,890円</span></p>
+          </a>
+        <li>
+          <p class="rank">4</p>
+          <a href="https://www.cecile.co.jp/detail/OC-1510">
+            <img src="https://www.cecile.co.jp/cmdty/img/11126/thumb/512/11126OC-1510.jpg">
+            <p>ひんやりタッチ3Dマスク(抗菌防臭・UVカット・吸水速乾・接触冷感)(3枚組)【パステルマスクCOOL】</p>
+            <p><span>850円</span></p>
+          </a>
+        <li>
+          <p class="rank">5</p>
+          <a href="https://www.cecile.co.jp/detail/YG-2094">
+            <img src="https://www.cecile.co.jp/cmdty/img/15306/thumb/512/15306YG-2094.jpg">
+            <p>オンリーミネラル 薬用ファンデーション</p>
+            <p><span>4,950円</span></p>
+          </a>
+        <li>
+          <p class="rank">6</p>
+          <a href="https://www.cecile.co.jp/detail/HL-325">
+            <img src="https://www.cecile.co.jp/cmdty/img/15306/thumb/512/15306HL-325.jpg">
+            <p>低糖質の植物性プロテインミックスナッツ</p>
+            <p><span>1,723円</span></p>
+          </a>
+        <li>
+          <p class="rank">7</p>
+          <a href="https://www.cecile.co.jp/detail/HG-564">
+            <img src="https://www.cecile.co.jp/cmdty/img/15306/thumb/512/15306HG-564.jpg">
+            <p>リアルサプリ DHA&EPA</p>
+            <p><span>624円</span></p>
+          </a>
+        <li>
+          <p class="rank">8</p>
+          <a href="https://www.cecile.co.jp/detail/WF-3344">
+            <img src="https://www.cecile.co.jp/cmdty/img/12202/thumb/512/12202WF-3344.jpg">
+            <p>匠の技ステンレス製高級つめきり</p>
+            <p><span>1,500円</span></p>
+          </a>
+        <li>
+          <p class="rank">9</p>
+          <a href="https://www.cecile.co.jp/detail/SK-365">
+            <img src="https://www.cecile.co.jp/cmdty/img/15101/thumb/512/15101SK-365.jpg">
+            <p>おやすみ着圧ハイソックス(アシスキット&reg;)(日本製)</p>
+            <p><span>980円</span></p>
+          </a>
+      </ul>
+      <div class="allview ranking ranking-4">
+        <a href="https://www.cecile.co.jp/sc/ranking/beauty/">
+          <div>人気ランキングの続きはこちら</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+
+      <ul class="grid ranking box-5">
+        <li>
+          <p class="rank">1</p>
+          <a href="https://www.cecile.co.jp/detail/UT-283">
+            <img src="https://www.cecile.co.jp/cmdty/img/15110/thumb/512/15110UT-283.jpg">
+            <p>ズレにくく着心地サラサラ スポーツブラ(ワイヤーなし)(吸汗・速乾)(のびのび素材)</p>
+            <p><span>1,090円</span></p>
+          </a>
+        <li>
+          <p class="rank">2</p>
+          <a href="https://www.cecile.co.jp/detail/TB-934">
+            <img src="https://www.cecile.co.jp/cmdty/img/11113/thumb/512/11113TB-934.jpg">
+            <p>形態安定 半袖シャツ(スクール・制服)(ガールズ)</p>
+            <p><span>1,090円</span></p>
+          </a>
+        <li>
+          <p class="rank">3</p>
+          <a href="https://www.cecile.co.jp/detail/SC-443">
+            <img src="https://www.cecile.co.jp/cmdty/img/15110/thumb/512/15110SC-443.jpg">
+            <p>丈別ソックス・5足組(防汚加工)(かかと・つま先補強)(5丈展開)(スクールソックス)</p>
+            <p><span>1,090円</span></p>
+          </a>
+        <li>
+          <p class="rank">4</p>
+          <a href="https://www.cecile.co.jp/detail/ST-306">
+            <img src="https://www.cecile.co.jp/cmdty/img/13116/thumb/512/13116ST-306.jpg">
+            <p>丈が選べるスマートドライソックス(3足組)(抗菌防臭)(吸汗・速乾)(4丈展開)(スクールソックス)</p>
+            <p><span>990円</span></p>
+          </a>
+        <li>
+          <p class="rank">5</p>
+          <a href="https://www.cecile.co.jp/detail/TB-2041">
+            <img src="https://www.cecile.co.jp/cmdty/img/15110/thumb/512/15110TB-2041.jpg">
+            <p>日本製ウールVネックニット(スクール・制服)</p>
+            <p><span>9,339円</span></p>
+          </a>
+        <li>
+          <p class="rank">6</p>
+          <a href="https://www.cecile.co.jp/detail/ET-915">
+            <img src="https://www.cecile.co.jp/cmdty/img/15110/thumb/512/15110ET-915.jpg">
+            <p>サニタリーオーバースパッツ(2枚組)(重ね履きで安心)(普通～多い日・多い日～夜用)(オーバーパンツ)</p>
+            <p><span>1,890円</span></p>
+          </a>
+        <li>
+          <p class="rank">7</p>
+          <a href="https://www.cecile.co.jp/detail/TB-933">
+            <img src="https://www.cecile.co.jp/cmdty/img/11113/thumb/512/11113TB-933.jpg">
+            <p>形態安定 長袖シャツ(スクール・制服)(ガールズ)</p>
+            <p><span>1,090円</span></p>
+          </a>
+        <li>
+          <p class="rank">8</p>
+          <a href="https://www.cecile.co.jp/detail/TB-2034">
+            <img src="https://www.cecile.co.jp/cmdty/img/15110/thumb/512/15110TB-2034.jpg">
+            <p>あったか毛80% Vネックニットカーディガン(スクール・制服)</p>
+            <p><span>3,900円</span></p>
+          </a>
+        <li>
+          <p class="rank">9</p>
+          <a href="https://www.cecile.co.jp/detail/TB-2054">
+            <img src="https://www.cecile.co.jp/cmdty/img/15110/thumb/512/15110TB-2054.jpg">
+            <p>ワンピース(取り外せるリボン付き)(スクール・制服)</p>
+            <p><span>6,900円</span></p>
+          </a>
+      </ul>
+      <div class="allview ranking ranking-5">
+        <a href="https://www.cecile.co.jp/sc/ranking//">
+          <div>人気ランキングの続きはこちら</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+
+      <ul class="grid ranking box-6">
+        <li>
+          <p class="rank">1</p>
+          <a href="https://www.cecile.co.jp/detail/AX-287">
+            <img src="https://www.cecile.co.jp/cmdty/img/14102/thumb/512/14102AX-287.jpg">
+            <p>形態安定2枚組レギュラーカラーシャツ(七分袖)(洗濯機OK)</p>
+            <p><span>2,990円</span></p>
+          </a>
+        <li>
+          <p class="rank">2</p>
+          <a href="https://www.cecile.co.jp/detail/MW-2156">
+            <img src="https://www.cecile.co.jp/cmdty/img/14102/thumb/512/14102MW-2156.jpg">
+            <p>形態安定レギュラーシャツ(7分袖)(UVカット・抗菌防臭・洗濯機OK・部屋干しOK)</p>
+            <p><span>1,790円</span></p>
+          </a>
+        <li>
+          <p class="rank">3</p>
+          <a href="https://www.cecile.co.jp/detail/MW-1954">
+            <img src="https://www.cecile.co.jp/cmdty/img/14102/thumb/512/14102MW-1954.jpg">
+            <p>形態安定2枚組レギュラーカラーシャツ(半袖)(洗濯機OK・S～3L)</p>
+            <p><span>2,790円</span></p>
+          </a>
+        <li>
+          <p class="rank">4</p>
+          <a href="https://www.cecile.co.jp/detail/MW-1371">
+            <img src="https://www.cecile.co.jp/cmdty/img/14102/thumb/512/14102MW-1371.jpg">
+            <p>形態安定2枚組ベルカラーシャツ(半袖)(洗濯機OK)</p>
+            <p><span>2,790円</span></p>
+          </a>
+        <li>
+          <p class="rank">5</p>
+          <a href="https://www.cecile.co.jp/detail/MW-1944">
+            <img src="https://www.cecile.co.jp/cmdty/img/14102/thumb/512/14102MW-1944.jpg">
+            <p>形態安定レギュラーカラーシャツ(半袖)(UVカット・抗菌防臭・洗濯機OK・部屋干しOK)</p>
+            <p><span>1,590円</span></p>
+          </a>
+        <li>
+          <p class="rank">6</p>
+          <a href="https://www.cecile.co.jp/detail/AN-974">
+            <img src="https://www.cecile.co.jp/cmdty/img/14102/thumb/512/14102AN-974.jpg">
+            <p>形態安定2枚組レギュラーカラーシャツ(長袖)(洗濯機OK)</p>
+            <p><span>2,990円</span></p>
+          </a>
+        <li>
+          <p class="rank">7</p>
+          <a href="https://www.cecile.co.jp/detail/MW-1947">
+            <img src="https://www.cecile.co.jp/cmdty/img/14102/thumb/512/14102MW-1947.jpg">
+            <p>形態安定ハマカラーシャツ(半袖)(UVカット・抗菌防臭・洗濯機OK・部屋干しOK)</p>
+            <p><span>1,590円</span></p>
+          </a>
+        <li>
+          <p class="rank">8</p>
+          <a href="https://www.cecile.co.jp/detail/AZ-823">
+            <img src="https://www.cecile.co.jp/cmdty/img/12102/thumb/512/12102AZ-823.jpg">
+            <p>スーツ用マーメイドスカート(事務服・洗濯機OK)</p>
+            <p><span>3,590円</span></p>
+          </a>
+        <li>
+          <p class="rank">9</p>
+          <a href="https://www.cecile.co.jp/detail/AZ-1346">
+            <img src="https://www.cecile.co.jp/cmdty/img/14102/thumb/512/14102AZ-1346.jpg">
+            <p>台形スカート(CoolBestⅡ・事務服・選べる2レングス・接触冷感・吸汗速乾・洗濯機OK)</p>
+            <p><span>4,990円</span></p>
+          </a>
+      </ul>
+      <div class="allview ranking ranking-6">
+        <a href="https://www.cecile.co.jp/sc/ranking/uniform/">
+          <div>人気ランキングの続きはこちら</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+
+      <ul class="grid ranking box-7">
+        <li>
+          <p class="rank">1</p>
+          <a href="https://www.cecile.co.jp/detail/BA-642">
+            <img src="https://www.cecile.co.jp/cmdty/img/13106/thumb/512/13106BA-642.jpg">
+            <p>花柄レース フルカップブラジャー(ワイヤー入り)</p>
+            <p><span>1,750円</span></p>
+          </a>
+        <li>
+          <p class="rank">2</p>
+          <a href="https://www.cecile.co.jp/detail/EP-195">
+            <img src="https://www.cecile.co.jp/cmdty/img/13106/thumb/512/13106EP-195.jpg">
+            <p>花柄レース ショーツ</p>
+            <p><span>870円</span></p>
+          </a>
+        <li>
+          <p class="rank">3</p>
+          <a href="https://www.cecile.co.jp/detail/AO-1512">
+            <img src="https://www.cecile.co.jp/cmdty/img/12106/thumb/512/12106AO-1512.jpg">
+            <p>【ぽっちゃりさんサイズ】胸レース使いワンピース</p>
+            <p><span>4,390円</span></p>
+          </a>
+        <li>
+          <p class="rank">4</p>
+          <a href="https://www.cecile.co.jp/detail/NB-5383">
+            <img src="https://www.cecile.co.jp/cmdty/img/14106/thumb/512/14106NB-5383.jpg">
+            <p>【ぽっちゃりさんサイズ】ボレロ</p>
+            <p><span>2,490円</span></p>
+          </a>
+        <li>
+          <p class="rank">5</p>
+          <a href="https://www.cecile.co.jp/detail/MP-2238">
+            <img src="https://www.cecile.co.jp/cmdty/img/12106/thumb/512/12106MP-2238.jpg">
+            <p>【ぽっちゃりさんサイズ】ニットデニムワイドパンツ(スマートニットジーンズ)(美脚パンツ・選べる2レングス)</p>
+            <p><span>4,390円</span></p>
+          </a>
+        <li>
+          <p class="rank">6</p>
+          <a href="https://www.cecile.co.jp/detail/NB-6291">
+            <img src="https://www.cecile.co.jp/cmdty/img/12106/thumb/512/12106NB-6291.jpg">
+            <p>【ぽっちゃりさんサイズ】おうち着セット(デザインT&ストライプパンツ)</p>
+            <p><span>5,990円</span></p>
+          </a>
+        <li>
+          <p class="rank">7</p>
+          <a href="https://www.cecile.co.jp/detail/AL-722">
+            <img src="https://www.cecile.co.jp/cmdty/img/12106/thumb/512/12106AL-722.jpg">
+            <p>【ぽっちゃりさんサイズ】ハイテンションタックフレアジャケット(洗濯機OK・日本製生地)</p>
+            <p><span>7,990円</span></p>
+          </a>
+        <li>
+          <p class="rank">8</p>
+          <a href="https://www.cecile.co.jp/detail/LF-136">
+            <img src="https://www.cecile.co.jp/cmdty/img/14106/thumb/512/14106LF-136.jpg">
+            <p>キュロットペチコート(ペチパンツ・吸汗・速乾・静電気防止)(アウターの透け防止・股ズレ対策)</p>
+            <p><span>1,860円</span></p>
+          </a>
+        <li>
+          <p class="rank">9</p>
+          <a href="https://www.cecile.co.jp/detail/SP-187">
+            <img src="https://www.cecile.co.jp/cmdty/img/13106/thumb/512/13106SP-187.jpg">
+            <p>綿混着圧ハイソックス(アシスキット)(日本製)(昼用)</p>
+            <p><span>1,090円</span></p>
+          </a>
+      </ul>
+      <div class="allview ranking ranking-7">
+        <a href="https://www.cecile.co.jp/sc/ranking/big/">
+          <div>人気ランキングの続きはこちら</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+
+      <div class="buyer">
+        <a href="https://www.cecile.co.jp/detail/NB-5961/?micd=14102&amp;appno=479656&amp;miseq=32&amp;ordno=0038">
+          <img src="https://www.cecile.co.jp/component/img/cmdty/buyer/1840_NB-5961.jpg">
+          <p class="icon"><span>バイヤー厳選</span></p>
+          <p>クルーネックTシャツ(綿100%・洗濯機OK)</p>
+          <p class="sub">今どきのゆるり感が楽しめる、大人のためのクルーネックTシャツ。</p>
+        </a>
+      </div>
+
+      <div class="title">ピックアップ特集</div>
+      <ul class="grid">
+        <li>
+          <a href="https://www.cecile.co.jp/sc/cover/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/cover_383_383_140106.jpg">
+            <p>ソファーカバーはフィットタイプが売れています</p>
+            <p><span>寝具・インテリア・雑貨</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/feature/pajama/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/pajama_383_383_160511.jpg">
+            <p>涼しくてかわいいパジャマでおうち時間をもっと心地よく</p>
+            <p><span>インナー・下着</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/sc/maease/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/maease_383_383_200313.jpg">
+            <p>脇の汗ジミ・汗ムレ対策でおしゃれに自信を</p>
+            <p><span>インナー・下着</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/sc/pants/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/pants_383_383_140106.jpg">
+            <p>機能や素材にこだわったパンツを豊富に取り揃えました</p>
+            <p><span>レディース</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/sc/cool/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/cool_383_383_140516.jpg">
+            <p>肌と接触した時にひんやり感じる涼しい夏の寝具を集めました</p>
+            <p><span>寝具・インテリア・雑貨</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/feature/onepiece/">
+            <img src="https://www.cecile.co.jp/component/img/banner/230_230/onepiece_230_230_140729.jpg">
+            <p>コーデを華やかにしてくれるチュニックやワンピースをご紹介</p>
+            <p><span>レディース</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/sc/prevention_goods/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/bousai_383_383_180809.jpg">
+            <p>台風や地震などの災害対策やもしもの備えに</p>
+            <p><span>寝具・インテリア・雑貨</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/feature/men/pajamas/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/pajama_mens_383_383_200120.jpg">
+            <p>肌に優しい素材やおしゃれなパジャマをご紹介</p>
+            <p><span>メンズ</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/feature/uv/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/uv_383_383_140422.jpg">
+            <p>今こそ徹底したいのがUVケア・紫外線対策！</p>
+            <p><span>美容・健康</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/sc/shorts/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/shorts_383_383_140106.jpg">
+            <p>毎日はくものだから…こんなショーツが欲しかった！！</p>
+            <p><span>インナー・下着</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/feature/goodprice/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/goodprice_383_383_200512.jpg">
+            <p>価格も品質も満足したい！こだわりの高見えアイテムをご紹介</p>
+            <p><span>レディース</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/feature/comfort_shoes/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/comfort_shoes_383_383_191129.jpg">
+            <p>履き心地にこだわったコンフォートシューズ、あなたにぴったりの1足を</p>
+            <p><span>レディース</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/feature/otona_tops/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/otona_tops_383_383_200227.jpg">
+            <p>大人に似合うオシャレな今旬トップスをピックアップ！</p>
+            <p><span>レディース</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/feature/plump/cutandsew/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/plump_cutandsew_383_383_200918.jpg">
+            <p>オシャレで快適なカットソーからお気に入りを見つけてみませんか？</p>
+            <p><span>大きいサイズ</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/feature/cupop/timesale/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/cupop_timesale_383_383_210708.jpg">
+            <p>洗える制服タイムセール_開催中</p>
+            <p><span>Cupopタイムセール</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/sc/diet/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/diet_383_383_140905.jpg">
+            <p>運動不足解消に！おうちで手軽にフィットネス</p>
+            <p><span>美容・健康</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/feature/bratop/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/bratop_383_383_200401.jpg">
+            <p>夏は1枚でブラとインナーを兼ねるブラトップがおすすめ！</p>
+            <p><span>インナー・下着</span></p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/sc/tsuyu/">
+            <img src="https://www.cecile.co.jp/component/img/banner/383_383/tsuyu_383_383_200417.jpg">
+            <p>梅雨の時期を乗り切るおすすめアイテムをご紹介</p>
+            <p><span>季節のおすすめ</span></p>
+          </a>
+      </ul>
+      <div class="allview">
+        <a href="https://www.cecile.co.jp/sc/">
+          <div>すべての特集を見る</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+
+      <div class="title">2021夏のトレンドコーディネート</div>
+      <div class="trend">
+        <a href="https://www.cecile.co.jp/sc/style/coordinate/A21MS-G002-m03-1560a.html">
+          <img src="https://www.cecile.co.jp/sc/style/component/img/l/A21MS-G122-m04-5385a.jpg">
+          <p>ウエストマークで表情を付けたフェミニンチュニックコーデ</p>
+        </a>
+      </div>
+      <ul class="grid trend">
+        <li>
+          <a href="https://www.cecile.co.jp/sc/style/coordinate/A21MS-G054-m05-4012a.html">
+            <img src="https://www.cecile.co.jp/sc/style/component/img/l/A21MS-G002-m03-1560a.jpg">
+            <p>前後差を付けたラウンドヘムタンクが今どきな夏カジュアル</p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/sc/style/coordinate/A21MS-G054-m05-4012a.html">
+            <img src="https://www.cecile.co.jp/sc/style/component/img/l/A21MS-G054-m05-4012a.jpg">
+            <p>大きめチェックが主役。トップスはシンプルにまとめて</p>
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/sc/style/coordinate/A21MS-G002-m02-0530a.html">
+            <img src="https://www.cecile.co.jp/sc/style/component/img/l/A21MS-G002-m02-0530a.jpg">
+            <p>マニッシュな配色もゆったりリラックスで抜け感をプラス</p>
+          </a>
+      </ul>
+
+      <div class="allview">
+        <a href="https://www.cecile.co.jp/sc/style/">
+          <div>すべてのコーディネートを見る</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+
+      <div class="title">カテゴリから探す</div>
+      <nav class="mod-side-category">
+        <ol id="nav-side-category-sp" class="list-category">
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/LD/" class="link-main"><span class="text">レディースファッション</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-LD-TS-1I/">Tシャツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-LD-TS-BR/">ブラウス</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-TS/">トップス</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-OP/">ワンピース</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-LD-TS-TN/">チュニック</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-LD-TS-1G/">ニット・セーター</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-PN/">パンツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-SK/">スカート</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-FR/">スーツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-BA/">バッグ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-SB/">シューズ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-FG/">ファッション小物</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-AC/">アクセサリー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-RN/">レインウェア</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-SW/">水着</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/IN/" class="link-main"><span class="text">女性下着</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-BS/">ブラジャー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-SU/">ブラ＆ショーツセット</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-SH/">ショーツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-IN/">肌着・インナー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-BD/">補整下着</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-LN/">ランジェリー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-IN/">ジュニア・ティーンズ下着</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-PJ/">パジャマ・ルームウェア</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-ST/">ストッキング・タイツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-SC/">靴下・ソックス</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/MN/" class="link-main"><span class="text">メンズファッション</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-MN-TS-1I/">Tシャツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-MN-TS-1E/">ポロシャツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-MN-CT-JK/">ジャケット</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-TS/">トップス</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-MN-TS-1G/">ニット・セーター</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-FR/">スーツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-MN-TS-YS/">ワイシャツ・カッターシャツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-PN/">パンツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-BA/">バッグ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-SB/">シューズ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-FG/">ファッション小物</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-RN/">レインウェア</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/UN/" class="link-main"><span class="text">メンズ下着</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UN-IN/">肌着・インナー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UN-SH/">トランクス・ブリーフ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UN-PJ/">パジャマ・ルームウェア</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UN-SC/">靴下・ソックス</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UN-ST/">タイツ・レギンス</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/UF/" class="link-main"><span class="text">事務服・作業服・白衣</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UF-OF/">事務服・OL制服</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UF-NS/">ナース服・白衣</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UF-WW/">作業着・ワークウェア</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UF-FU/">飲食店ユニフォーム</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/SC/" class="link-main"><span class="text">制服・学生服</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-HS/">高校制服</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-JH/">中学校制服</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-PS/">小学校制服</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-GL/">女子制服</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-BY/">男子制服</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-IN/">ジュニア・ティーンズ下着</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/s/big/" class="link-main"><span class="text">大きいサイズ</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="/feature/lsize/lady/">大きいサイズ レディース服</a></li>
+                <li><a class="link-sub" href="/feature/lsize/inner/">大きいサイズ レディース下着</a></li>
+                <li><a class="link-sub" href="/feature/lsize/men/">大きいサイズ メンズ</a></li>
+                <li><a class="link-sub" href="/feature/lsize/office/">大きいサイズ 事務服・制服</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/FS/" class="link-main"><span class="text">ファッション・下着すべて</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-FS-TS-1I">Tシャツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-TS/">トップス</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-FS-CT-JK/">ジャケット</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-FS-TS-1G/">ニット・セーター</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-OP/">ワンピース</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-PN/">パンツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-SK/">スカート</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-FR/">スーツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-BS/">ブラジャー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-SU/">ブラ＆ショーツセット</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-SH/">ショーツ・トランクス</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-IN/">肌着・インナー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-BD/">補整下着</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-LN/">ランジェリー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-PJ/">パジャマ・ルームウェア</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-ST/">ストッキング・タイツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-SC/">靴下・ソックス</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-BA/">バッグ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-SB/">シューズ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-AC/">アクセサリー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-FG/">ファッション小物</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-RN/">レインウェア</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/FN/" class="link-main"><span class="text">家具・収納</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-KT/">キッチン収納・食器棚</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-CL/">衣類収納</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-CO/">クローゼット・押入れ収納</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-OT/">収納家具・収納 その他</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-EN/">玄関収納・屋外収納</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-CH/">チェスト・キャビネット</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-LC/">ラック</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-BK/">本棚</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-TB/">テーブル・机</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-SF/">ソファー・チェアー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-TV/">テレビ台</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-KO/">こたつ・こたつ布団</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-KD/">学習机･子供部屋</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-DR/">ドレッサー・ミラー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-BU/">仏壇・仏具</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/BD/" class="link-main"><span class="text">寝具・ベッド</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-CV/">布団カバー・シーツ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-CL/">布団・枕</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-BL/">毛布・タオルケット</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-BD/">ベッド</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-MT/">マットレス</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-BS/">ベッドサイド家具・小物</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-CF/">安眠・快眠グッズ</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/CT/" class="link-main"><span class="text">カーテン・ラグ・ファブリック</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-CT/">カーテン</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-BL/">ブラインド・ロールスクリーン</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-CP/">カーペット</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-MT/">ラグ・マット類</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-CV/">カバー類</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-TW/">タオル</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-CS/">クッション・座布団</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-TL/">トイレタリー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-SP/">スリッパ</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/LF/" class="link-main"><span class="text">キッチン・雑貨・日用品</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-LF-EL-1D/">扇風機</a></li>		
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-KT/">キッチン用品</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-LG/">生活雑貨</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-BT/">バス用品・ランドリー</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-EL/">家電・AV機器</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-TL/">トイレ用品</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-LN/">洗濯用品・掃除道具</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-IN/">インテリア雑貨・小物</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-HG/">趣味雑貨</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-FL/">花・ガーデニング</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-GF/">ギフト</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/genre/g1/1/BT/" class="link-main"><span class="text">美容・健康・サプリメント</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-HC/">ヘアケア・ボディケア</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-PF/">コスメ・ネイル・香水</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-CS/">スキンケア化粧品</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-BR/">ブランドで選ぶ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-ES/">ホームエステ</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-HF/">ダイエット・健康食品</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-SP/">サプリメント</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-SN/">衛生用品</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-HG/">健康器具</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-NC/">シニア・介護用品</a></li>
+              </ol>
+            </div>
+          </li>
+          <li><a href="https://www.cecile.co.jp/bargain/" class="link-main"><span class="text">バーゲン</span></a>
+            <div class="box-nav-sub">
+              <ol class="list-sub-category">
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/LD/bargain/">レディースファッション</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/IN/bargain/">女性下着</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/MN/bargain/">メンズファッション</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/UN/bargain/">メンズ下着</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/UF/bargain/">事務服・作業服・白衣</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/SC/bargain/">制服・学生服</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/FS/bargain/">ファッション・下着すべて</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/FN/bargain/">家具・収納</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/BD/bargain/">寝具・ベッド</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/CT/bargain/">カーテン・ラグ・ファブリック</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/LF/bargain/">キッチン・雑貨・日用品</a></li>
+                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/BT/bargain/">美容・健康・サプリメント</a></li>
+              </ol>
+            </div>
+          </li>
+        </ol>
+      </nav>
+
+      <div class="catalog_info">
+        <img src="/static/images/catalog.png">
+        <ol>
+          <li class="multi">
+            <a href="https://www.cecile.co.jp/site/order/sheet/ConfSrv.jsp">
+              <div class="label">カタログ・チラシをお持ちの方<span>申込番号でご注文</span></div>
+              <div class="icon"><i class="material-icons">chevron_right</i></div>
+            </a>
+          <li>
+            <a href="https://www.cecile.co.jp/site/inquiry/catalog/SelectSrv.jsp">
+              <div>カタログ無料プレゼント</div>
+              <div class="icon"><i class="material-icons">chevron_right</i></div>
+            </a>
+        </ol>
+      </div>
+      <ul class="grid footer">
+        <li>
+          <a href="https://www.cecile.co.jp/card/">
+            <img src="/static/images/present2.png">
+          </a>
+        <li>
+          <a href="https://www.cecile.co.jp/present/">
+            <img src="/static/images/present1.png" class="hosei">
+          </a>
+      </ul>
+    </div>
+    <div class="catalog" style="display:none;">
+      <div class="title">2021春夏号 デジタルカタログ</div>
+      <div class="feature">
+        <table>
+          <tr>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/11105/" target="_blank"><img src="/static/photos/catalog/1.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/11101/" target="_blank"><img src="/static/photos/catalog/2.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/11103/" target="_blank"><img src="/static/photos/catalog/3.jpg"></a>
+          <tr>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/11110/" target="_blank"><img src="/static/photos/catalog/4.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/11303/" target="_blank"><img src="/static/photos/catalog/5.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/11201/" target="_blank"><img src="/static/photos/catalog/6.jpg"></a>
+          <tr>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/11301/" target="_blank"><img src="/static/photos/catalog/7.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/11203/" target="_blank"><img src="/static/photos/catalog/8.jpg"></a>
+        </table>
+      </div>
+      <div class="title">2020真冬号 デジタルカタログ</div>
+      <div class="feature">
+        <table>
+          <tr>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/07102/" target="_blank"><img src="/static/photos/catalog/9.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/07105/" target="_blank"><img src="/static/photos/catalog/10.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/07101/" target="_blank"><img src="/static/photos/catalog/11.jpg"></a>
+          <tr>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/07103/" target="_blank"><img src="/static/photos/catalog/12.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/07106/" target="_blank"><img src="/static/photos/catalog/13.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/07303/" target="_blank"><img src="/static/photos/catalog/14.jpg"></a>
+          <tr>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/07201/" target="_blank"><img src="/static/photos/catalog/15.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/07301/" target="_blank"><img src="/static/photos/catalog/16.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/07202/" target="_blank"><img src="/static/photos/catalog/17.jpg"></a>
+          <tr>
+            <td><a href="https://www.cecile.co.jp/fst/digicata/07110/" target="_blank"><img src="/static/photos/catalog/18.jpg"></a>
+        </table>
+      </div>
+    </div>
+    <div class="lenz" style="display:none;">
+      <div class="camera"><i class="material-icons">person_search</i><p>ファッションレンズ</p></div>
+      <div class="title-s">撮影した写真</div>
+      <div class="photo"><img src="/static/photos/camera/photo.jpg"></div>
+      <div class="title">検索結果</div>
+      <div class="title-s">（商品）</div>
+      <div class="feature">
+        <table>
+          <tr>
+            <td><a href="https://www.cecile.co.jp/detail/MW-3304/" target="_blank"><img src="/static/photos/camera/1.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/detail/MW-3290/" target="_blank"><img src="/static/photos/camera/2.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/detail/MW-2894/" target="_blank"><img src="/static/photos/camera/3.jpg"></a>
+          <tr>
+            <td><a href="https://www.cecile.co.jp/detail/MW-3311/" target="_blank"><img src="/static/photos/camera/4.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/detail/MW-2612/" target="_blank"><img src="/static/photos/camera/5.jpg"></a>
+            <td>
+        </table>
+      </div>
+      <div class="title-s">（カタログ）</div>
+      <div class="feature">
+        <table>
+          <tr>
+            <td><a href="https://www.cecile.co.jp/site/cmdtyinfo/digicata/ListSrv.jsp?micd=07102&pgno=38" target="_blank"><img src="/static/photos/catalog/9.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/site/cmdtyinfo/digicata/ListSrv.jsp?micd=07106&pgno=66" target="_blank"><img src="/static/photos/catalog/13.jpg"></a>
+            <td><a href="https://www.cecile.co.jp/site/cmdtyinfo/digicata/ListSrv.jsp?micd=07110&pgno=30" target="_blank"><img src="/static/photos/catalog/18.jpg"></a>
+        </table>
+      </div>
+      <div class="camera-history"><i class="material-icons">history</i><p>撮影履歴</p></div>
+      <div class="history">
+        <table>
+          <tr>
+            <td><img src="/static/photos/camera/h1.jpg">
+            <td><img src="/static/photos/camera/h2.jpg">
+            <td><img src="/static/photos/camera/h3.webp">
+            <td>
+            <td>
+        </table>
+      </div>
+    </div>
+    <div class="chat" style="display:none;">
+      <div class="line__left">
+        <figure>
+          <img src="/static/photos/chat/chat.png" />
+        </figure>
+        <div class="line__left-text">
+          <div class="name">セシール</div>
+          <div class="text">カタログ番号をおっしゃってください</div>
+        </div>
+      </div>
+      <div class="line__right">
+        <div class="text">1790</div>
+        <span class="date">既読<br>0:30</span>
+      </div>
+      <div class="line__left">
+        <figure>
+          <img src="/static/photos/chat/chat.png" />
+        </figure>
+        <div class="line__left-text">
+          <div class="name">セシール</div>
+          <div class="text">２０真冬プランプ カタログですね<br />間違いなければ【申し込み番号】をおっしゃってください</div>
+        </div>
+        <div class="line__left">
+          <div class="stamp"><img src="/static/photos/chat/catalog.jpg" /></div>
+        </div>
+      </div>
+      <div class="line__right">
+        <div class="text">274667</div>
+        <span class="date">既読<br>0:30</span>
+      </div>
+      <div class="line__left">
+        <figure>
+          <img src="/static/photos/chat/chat.png" />
+        </figure>
+        <div class="line__left-text">
+          <div class="name">セシール</div>
+          <div class="text">【ぽっちゃりさんサイズ】ミックスカラーニットですね</div>
+        </div>
+        <div class="line__left">
+          <div class="stamp"><img src="/static/photos/chat/item.jpg" /></div>
+        </div>
+      </div>
+      <div class="line__left">
+        <figure>
+          <img src="/static/photos/chat/chat.png" />
+        </figure>
+        <div class="line__left-text">
+          <div class="name">セシール</div>
+          <div class="text">間違いなければ次の中から【カラー番号】をおっしゃってください<br />
+          1. オフホワイト<br />
+          2. アッシュグリーン
+          </div>
+        </div>
+      </div>
+      <div class="line__right">
+        <div class="text">1</div>
+        <span class="date">既読<br>0:30</span>
+      </div>
+      <div class="line__left">
+        <figure>
+          <img src="/static/photos/chat/chat.png" />
+        </figure>
+        <div class="line__left-text">
+          <div class="name">セシール</div>
+          <div class="text">1の【オフホワイト】ですね<br />
+          間違いなければ次の中から【サイズ番号】をおっしゃってください<br />
+          1. L<br />
+          2. LL<br />
+          3. 3L<br />
+          4. 4L
+          </div>
+        </div>
+      </div>
+      <div class="line__right">
+        <div class="text">2</div>
+        <span class="date">既読<br>0:30</span>
+      </div>
+      <div class="line__left">
+        <figure>
+          <img src="/static/photos/chat/chat.png" />
+        </figure>
+        <div class="line__left-text">
+          <div class="name">セシール</div>
+          <div class="text">2の【LL】ですね<br />
+          間違いなければ【注文数】をおっしゃってください
+          </div>
+        </div>
+      </div>
+      <div class="line__right">
+        <div class="text">1</div>
+        <span class="date">既読<br>0:30</span>
+      </div>
+      <div class="line__left">
+        <figure>
+          <img src="/static/photos/chat/chat.png" />
+        </figure>
+        <div class="line__left-text">
+          <div class="name">セシール</div>
+          <div class="text">数量は【1】ですね<br />
+          他にご注文される商品はございますか？
+          </div>
+        </div>
+      </div>
+      <div class="line__right">
+        <div class="text">ない</div>
+        <span class="date">既読<br>0:30</span>
+      </div>
+      <div class="line__left">
+        <figure>
+          <img src="/static/photos/chat/chat.png" />
+        </figure>
+        <div class="line__left-text">
+          <div class="name">セシール</div>
+          <div class="text">かしこまりました<br />
+          注文内容をカートに入れられますか？<br />
+          もしくはすぐに購入されますか？
+          </div>
+        </div>
+      </div>
+      <div class="line__right">
+        <div class="text">カートに入れて</div>
+        <span class="date">既読<br>0:30</span>
+      </div>
+      <div class="line__left">
+        <figure>
+          <img src="/static/photos/chat/chat.png" />
+        </figure>
+        <div class="line__left-text">
+          <div class="name">セシール</div>
+          <div class="text">かしこまりました<br />
+          注文内容をカートに入れさせていただきました<br />
+          <a href="https://www.cecile.co.jp/site/order/cart/CartSrv.jsp" target="_blank">【ショッピングカートを確認する】</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--
+  <div id="toolbar" style="display:none;">
+    <table>
+      <tr>
+        <td disp="container" class="active"><i class="material-icons">home</i><p>ホーム</p>
+        <td disp="catalog"><i class="material-icons">menu_book</i><p>カタログ</p>
+        <td disp="lenz"><i class="material-icons">camera_enhance</i><p>画像検索</p>
+        <td disp="chat"><i class="material-icons">settings</i><p>設定</p>
+    </table>
+  </div>
+  -->
+</body>
+</html>

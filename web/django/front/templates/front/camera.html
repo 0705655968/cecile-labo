@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>カタログ画像検索</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="Cecile Inc">
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="/static/css/common.css?v=0001">
+  <script src="/static/js/common.js"></script>
+</head>
+<body>
+  <div id="contents">
+    <header>
+      <h3>カタログ画像検索</h3>
+      <div class="settings">
+        <a href="settings"><i class="material-icons submit">settings</i></a>
+      </div>
+    </header>
+    <div class="camera">
+      <div class="select_photo" style="display:none;">
+        <div>
+          <div class="camera"><i class="material-icons">add_a_photo</i><br />写真</div>
+        </div>
+      </div>
+      <div class="select">
+        <div>
+          <a href="camera"><i class="material-icons">add_a_photo</i><br />写真</a>
+        </div>
+        <div>
+          <a href="gallery"><i class="material-icons">photo_library</i><br />ギャラリー</a>
+        </div>
+      </div>
+
+      <div class="detail" style="display:none;">
+        <p>カタログ表紙やカタログ内に掲載されている商品の写真を撮ったり、過去に撮った写真をギャラリーから選択したデータをもとに、商品の検索がおこなえるサービスです。</p>
+        <p>上のカメラアイコンを選択し、検索する画像をギャラリーもしくは写真で撮影してください。</p>
+      </div>
+      <div class="detail">
+        <p>カタログ表紙やカタログ内に掲載されている商品の写真を撮ったり、過去に撮った写真をギャラリーから選択したデータをもとに、商品の検索がおこなえるサービスです。</p>
+        <p>写真を撮影される場合は【写真】を、撮影済み写真を再利用される場合は【ギャラリー】を選択してください。</p>
+      </div>
+    </div>
+
+    <form id="postimage" action="" method="post" enctype="multipart/form-data" accept="image/*" capture="camera" style="display:none;">
+    {% csrf_token %}
+    {#forms.ImageFieldを表示#}
+    {{ form.file }}
+    <br><br>
+    {#エラーメッセージを表示#}
+    {% for field in form %}
+        {% if form.errors %}
+            <font color=#CC3300>{{ field.errors }}</font><br>
+        {% endif %}
+    {% endfor %}
+    {#保存されたファイル名を表示#}
+    {% if filename_save %}
+        ファイル名 {{ filename_save }} で保存されました。
+        <br><br>
+    {% endif %}
+    <input type="submit" value="送信"/>
+    </form>
+</body>
+</html>

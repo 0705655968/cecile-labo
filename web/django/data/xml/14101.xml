@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<libook>
+	<information />
+	<configration>
+		<realTrend probability="10">0</realTrend>
+		<imgPrefix>//dc.cecile.co.jp/14101/img</imgPrefix>
+		<opSpread>right</opSpread>
+		<menuPos>right</menuPos>
+		<totalPages>134</totalPages>
+		<scaleSize>1,2,4,8</scaleSize>
+		<bookW>335</bookW>
+		<bookH>475</bookH>
+		<sliceW>350</sliceW>
+		<sliceH>2880</sliceH>
+		<mainColor>0x9393ff</mainColor>
+		<mainTextColor>0xFFFFFF</mainTextColor>
+		<subColor>0x9393ff</subColor>
+		<subTextColor>0xFFFFFF</subTextColor>
+		<bookShadow>1</bookShadow>
+		<pageShadow>0</pageShadow>
+		<pageStyle>4</pageStyle>
+		<sideMenu>1</sideMenu>
+		<areaNavi>1</areaNavi>
+		<mouseWheel>1</mouseWheel>
+		<flipAnimation>1</flipAnimation>
+		<link color1="0xC9315B" color2="0xC9315B" alpha1="3,60" alpha2="100,0" explainImg="linkExplainImg.png">0</link>
+		<logo adress="">1</logo>
+		<scaleBtn>0</scaleBtn>
+		<pageAssign nombre="0">1</pageAssign>
+		<autoPlay time="1,3,5,10">1</autoPlay>
+		<printOut scale="4" style="2">1</printOut>
+		<shoppingPage color="0xffbf1f" textColor="0xFFFFFF" adress="javascript:openPageCart('"  inactive="">1</shoppingPage>
+		<fusen color="0xffffad,0xadffad,0xbcbcff,0xffadff4,0xffd6ad" textColor="0x333333">1</fusen>
+		<visualIndex>1</visualIndex>
+		<catalogMenu color="0xadd6ff" textColor="0xFFFFFF" adress="../catalog.xml">1</catalogMenu>
+		<menuStyle active="text" time="3" bookMove="0" sort="text,visual,fusen,catalog">0</menuStyle>
+		<help adress="javascript:openHelp();void(0);">2</help>
+		<catalogOrder adress="http://www.cecile.co.jp/Page/Inquiry/Catalog/index.aspx">0</catalogOrder>
+		<quit color="0xffbf7f">1</quit>
+		<background style="1">1</background>
+		<hidePage></hidePage>
+		<pageCode>8271805717</pageCode>
+		<cacheQuery></cacheQuery>
+		<showPageItem color1="0xFF0000" color2="0xFF0000" alpha1="0" alpha2="70" style="1" size="4" icon="1">1</showPageItem>
+		<ptFile>img.txt</ptFile>
+		<monitorFit>1</monitorFit>
+		<configWin>1</configWin>
+		<flipAnimation speed="95">1</flipAnimation>
+		<pageSlidebar>1</pageSlidebar>
+	</configration>
+
+	<contents>
+	</contents>
+
+</libook>

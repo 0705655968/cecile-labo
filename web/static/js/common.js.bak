@@ -1,0 +1,370 @@
+
+var flag_speech = false,
+//	flag_read = false,
+	voice_on = false,
+	recognition = null,
+	cache = ["","","",""],
+	ua = navigator.userAgent,
+	buf = "",
+	sp = 4,
+	sb = 20,
+	device = "pc";
+	if ((ua.indexOf('iPhone')>0&&ua.indexOf('iPad')==-1)||ua.indexOf('iPod')>0||ua.indexOf('Android')>0){
+		device="sp";
+		sp = 2;
+		sb = 10;
+	}
+
+document.addEventListener('lazybeforeunveil', function(e){
+	var bg = e.target.getAttribute('data-bg');
+	if(bg){
+		e.target.style.backgroundImage='url('+bg+')';
+		e.target.style.backgroundSize='cover';
+	}
+});
+
+$(function(){
+	$('#voice').on('click',function(){
+		if(!voice_on){
+			$(".voice-circle").css("background-color","rgba(0,99,160,0.8)");
+			$(".voice-ring").css("background-color","rgba(255,255,255,0.2)");
+			voice_on = true;
+			vr_function();
+		}
+		else{
+			$(".voice-circle").css("background-color","rgba(125,125,125,0.7)");
+			$(".voice-ring").css("background-color","rgba(255,255,255,0)");
+			voice_on = false;
+			vr_end();
+		}
+	});
+	
+	$('body').on('click','.preview',function(){
+		var obj = $(this).parent(),
+			buf = [
+				obj.attr("data-bg"),
+				obj.attr("data-ttl"),
+				obj.attr("data-dtl"),
+				obj.attr("data-info"),
+				obj.attr("data-cast")
+			];
+		cache[0] = buf[0];
+		for(var i=1;i<=4; i++){
+			cache[i] = $("div.screen-txt h"+i).text();
+			if(i==4&&buf[i]) buf[i] = decodeText(buf[i]);
+			$("div.screen-txt h"+i).html(buf[i]);
+		}
+		$(".disp").css("background-image","linear-gradient(rgba(0,0,0,.1),rgba(0,0,0,1)),url("+cache[0]+")");
+		$(".preview").removeClass("act");
+		$(this).addClass("act");
+		return false;
+	});
+	$('body').on('click','.movie',function(){
+		var movieId = $(this).attr("data-id");
+		$.ajax({
+			url: "/do/detail",
+			type:'POST',
+			data:{"id":movieId},
+			cache: false,
+			success: function(html){
+				var d = html.split("|");
+				$("body").attr("id","content");
+				$("div.screen-txt h1").html(d[0]);
+				$("div.screen-txt h2").html(d[2]);
+				$("div.screen-txt h3").html(d[3]);
+				if(d[4]){
+					$("div.screen-txt h4").html(d[4]);
+					$("div.screen-txt h4").show();
+				}
+				else $("div.screen-txt h4").hide();
+				$(".disp").css("background-image","linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,1)),url("+d[1]+")");
+				$("div.box").html(d[6]);
+				var swiper = new Swiper('.swiper-container',{
+					slidesPerView: sp,
+					spaceBetween: sb,
+					freeMode: true
+				});
+			}
+		});
+	});
+});
+
+$(window).load(function(){
+	var swiper = new Swiper('.swiper-container',{
+		slidesPerView: sp,
+		spaceBetween: sb,
+		freeMode: true
+	});
+	if(device=="pc"){
+		$(".box").mCustomScrollbar({
+			theme:"minimal",
+			axis:"y",
+			scrollInertia:0,
+			advanced:{
+				updateOnContentResize: true
+			},
+			mouseWheel:{
+				mouseWheelPixels: 30
+			}
+		});
+    }
+	$(".disp").css("background-image","linear-gradient(rgba(0,0,0,.1),rgba(0,0,0,1)),url("+$("#topbg").val()+")");
+});
+
+function vr_function(){
+	/*
+	window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+	var recognition = new webkitSpeechRecognition();
+	recognition.lang = 'ja';
+ 	recognition.onresult = function(event){
+    	var results = event.results,
+			txt = "";
+    	for (var i = event.resultIndex; i<results.length; i++)
+			txt += results[i][0].transcript;
+		va_function(txt);
+	}
+	recognition.onnomatch = function() {
+		va_function("");
+	};
+	recognition.start();
+	*/
+	
+	window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+	recognition = new webkitSpeechRecognition();
+	recognition.lang = 'ja';
+	recognition.interimResults = true;
+	recognition.continuous = true;
+
+	recognition.onsoundstart = function() {
+		if(voice_on){
+			$("#status").text("認識中");
+			$(".voice-ring").css("background-color","rgba(255,255,255,0.8)");
+			flag_speech = true;
+		}
+	};
+	recognition.onerror = function() {
+		if(voice_on){
+			vr_function();
+			$("#status").text("エラー");
+		}
+	};
+	recognition.onsoundend = function() {
+		if(voice_on){
+			recognition.stop();
+			buf = $("#result_text").text();
+			var flad_end = false,
+				uri = "",
+				ss = new SpeechSynthesisUtterance();
+
+			if(buf=="ありがとう"){
+				buf = "どういたしまして。またお声掛けください。";
+				flad_end = true;
+			}
+			else if(buf=="終了"||buf=="バイバイ"){
+				buf = "ボイスアシスタントを終了します。";
+				flad_end = true;
+			}
+			else if(buf.match("ジャッキー")){
+				uri = "/do/content";
+				rid = "R002";
+				buf = "";
+			}
+			else if(buf.match("ジブリ")){
+				uri = "/do/content";
+				rid = "R004";
+				buf = "";
+			}
+			else if(buf.match("おすすめ")){
+				uri = "/do/content";
+				rid = "R003";
+				buf = "";
+			}
+			else if(buf.match("いいね")) buf = "そういってもらえて、うれしいです。";
+			else if(buf.match("ジョブズ|スティーブ・ジョブズ")){
+				uri = "/do/content";
+				rid = "R001";
+				buf = "";
+			}
+			else if(buf.match("トップ|メインメニュー")){
+				uri = "home";
+				buf = "TOPメニューを表示します。";
+			}
+			else if(buf.match("おもしろい|面白い")){
+				buf = "まだ仕事時間中ですが、映画をみて遊んでいても大丈夫ですか？";
+			}
+			else if(buf.match("違うな|ちがうな")){
+				buf = "申し訳ありません。次はがんばりますね。";
+			}
+			else if(buf.match("教えて")){
+				uri = "/do/content";
+				rid = "R005";
+				buf = "";
+			}
+			else if(buf.match("今夜|ビール")){
+				uri = "/do/content";
+				rid = "R009";
+				buf = "";
+			}
+			else if(buf.match("花見|桜|さくら")){
+				uri = "/do/content";
+				rid = "R008";
+				buf = "";
+			}
+			else if(buf.match("いい感じ")){
+				uri = "/do/content";
+				rid = "R007";
+				buf = "";
+			}
+			else if(buf.match("仕事")){
+				uri = "/do/content";
+				rid = "R006";
+				buf = "";
+			}
+			else if(buf){
+				// 疲れたに対する対応
+				// 昼　あと少しでお仕事も終わりですね。頑張って
+				// 夜　今日も一日お疲れ様でした。
+				// わかりました。
+				// 東京は葉桜が目立つようになり、そろそろ花見もおしまいですね。
+//				if(buf.match(/映画/)) buf += "をご案内します。";
+//				else buf += "に関する映画をお調べしました。";
+				if(buf.match("映画")) buf += "は見つかりませんでした。";
+				else buf += "に該当する作品は見つかりませんでした。";
+			}
+			if(uri=="home"){
+				ss.text = buf;
+				ss.lang = "ja-JP";
+				speechSynthesis.speak(ss);
+		   		ss.onend = function(event){
+					location.href="/";
+				}
+			}
+			else if(uri){
+				$.ajax({
+					url: uri,
+					type:'POST',
+					data:{"id":rid},
+					cache: false,
+					success: function(html){
+						var d = html.split("|");
+//						$(".box").html(html);
+//						$('.box').scrollTop(0);
+						if(uri=="/do/content"){
+							$("body").attr("id","content");
+							$("div.screen-txt h1").html(d[0]);
+							$("div.screen-txt h2").html(d[2]);
+							$("div.screen-txt h3").html(d[3]);
+							if(d[4]){
+								$("div.screen-txt h4").html(d[4]);
+								$("div.screen-txt h4").show();
+							}
+							else $("div.screen-txt h4").hide();
+							$(".disp").css("background-image","linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,1)),url("+d[1]+")");
+							$("div.box").html(d[6]);
+							ss.text = d[5];
+							ss.lang = "ja-JP";
+							speechSynthesis.speak(ss);
+		    				ss.onend = function(event){
+								if(flad_end){
+									$(".voice-circle").css("background-color","rgba(125,125,125,0.7)");
+									$(".voice-ring").css("background-color","rgba(255,255,255,0)");
+									voice_on = false;
+									vr_end();
+								}
+								else{
+									$("#status").text("再開");
+   	     							vr_function();
+								}
+							}
+							var swiper = new Swiper('.swiper-container',{
+									slidesPerView: sp,
+									spaceBetween: sb,
+									freeMode: true
+								});
+						}
+						else{
+							var result = $('.box').find('.lazyload'),
+								obj = result[0],
+								buf = [
+									$(obj).attr("data-bg"),
+									$(obj).attr("data-ttl"),
+									$(obj).attr("data-dtl"),
+									$(obj).attr("data-info")
+								];
+							cache[0] = buf[0];
+							for(var i=1;i<=3; i++){
+								cache[i] = $("div.screen-txt h"+i).text();
+								$("div.screen-txt h"+i).html(buf[i]);
+							}
+							$("div.screen-txt h4").hide();
+							$("div.screen-txt h3").show();
+							$(".disp").css("height","30vh");
+							$(".box").css("top","30vh");
+							$(".box").css("height","70vh");
+							$(".disp").css("background-image","linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,1)),url("+cache[0]+")");
+							if(uri="t.html"){
+								var swiper = new Swiper('.swiper-container',{
+										slidesPerView: sp,
+										spaceBetween: sb,
+										freeMode: true
+									});
+							}
+						}
+					}
+				});
+			}
+			else{
+				if(buf){
+					ss.text = buf;
+					ss.lang = "ja-JP";
+					speechSynthesis.speak(ss);
+		    		ss.onend = function(event){
+						if(flad_end){
+							$(".voice-circle").css("background-color","rgba(125,125,125,0.7)");
+							$(".voice-ring").css("background-color","rgba(255,255,255,0)");
+							voice_on = false;
+							vr_end();
+						}
+						else{
+							$("#status").text("再開");
+   	     					vr_function();
+						}
+					}
+   	 			}
+				else{
+					$("#status").text("再開");
+    	    		vr_function();
+				}
+			}
+		}
+	};
+	recognition.onresult = function(event) {
+		var buf = "";
+		var results = event.results;
+		if(flag_speech){
+			for(var i = event.resultIndex; i < results.length; i++) buf = buf + results[i][0].transcript;
+			$("#result_text").text(buf);
+		}
+	}
+	if(voice_on){
+		$("#status").text("開始");
+		flag_speech = false;
+		$("#result_text").text("");
+		$(".voice-ring").css("background-color","rgba(255,255,255,0.2)");
+		recognition.start();
+	}
+	
+}
+
+function vr_end()
+{
+	recognition.stop();
+	recognition.abort();
+	$("#status").text("終了");
+	flag_speech = false;
+}
+
+function decodeText(str)
+{
+	return decodeURIComponent(escape(atob(str)));
+}
