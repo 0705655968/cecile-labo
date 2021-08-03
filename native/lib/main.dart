@@ -6,8 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 void main() {
   runApp(CecileApp());
@@ -50,6 +51,8 @@ class _WebViewScreenState extends State<WebViewScreen> {
   final _selectedBgColor = Color.fromRGBO(173, 32, 32, 1.0);
   final _unselectedBgColor = Colors.white;
   final _loadingPage = '<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="https://cecile-dev.prm.bz/static/css/common.css?v=0002"></head><body><div id="contents"><header><h3>カタログ画像検索</h3></header><div class="loading"><i class="material-icons">image_search</i><br />商品検索中..</div></body></html>';
+  final _historyPageHeader = '<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="https://cecile-dev.prm.bz/static/css/common.css"></head><body><div id="contents"><header><h3>カタログ画像検索</h3></header><div class="search_history"><div class="title"><i class="material-icons submit">history</i>検索履歴</div>';
+  final _historyPageFooter = '<br style="clear:both;"/><div class="title"><i class="material-icons submit">search</i>検索</div></div><div class="camera"><div class="select_photo"><div><div class="camera"><a href="https://cecile-dev.prm.bz/gallery"><i class="material-icons">add_a_photo</i><br />写真を撮る</a></div></div></div><div class="detail_re"><p>検索を行われる場合、上のカメラアイコンを選択し、検索する写真を撮影してください。</p></div></div></div></body></html>';
 
   @override
   void initState() {
@@ -148,10 +151,75 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 }
                 // ブラウザで開くリンクの判別
                 final uri = Uri.parse(request.url);
-                print(uri);
+                print(uri.path);
                 if(uri.path == "/push_settings"){
                   // アプリ設定画面へ移動
                   openAppSettings();
+                  return NavigationDecision.prevent;
+                }
+                else if(uri.path.contains('history_find')) {
+                  // 過去の写真での再検索
+                  final userDirectory = await getApplicationDocumentsDirectory();
+                  String imgFile = userDirectory.path + '/' + uri.path.split('/').last;
+
+                  // 検索中画面の表示
+                  _webViewController.loadUrl(Uri.dataFromString(
+                      _loadingPage,
+                      mimeType: 'text/html',
+                      encoding: Encoding.getByName('utf-8')
+                  ).toString());
+
+                  // 画像データを転送する
+                  try{
+                    final dio = Dio();
+                    dio.options.headers = {
+                      'Content-Type': 'application/x-www-form-urlencoded'
+                    };
+                    var formData = FormData.fromMap({
+                      'file': await MultipartFile.fromFile(imgFile)
+                    });
+                    final response = await dio.post(
+                      'https://cecile-dev.prm.bz/similar',
+                      data: formData,
+                    );
+                    _webViewController.loadUrl(Uri.dataFromString(
+                        response.data,
+                        mimeType: 'text/html',
+                        encoding: Encoding.getByName('utf-8')
+                    ).toString());
+                  } catch (err) {
+                    print('uploading error: $err');
+                  }
+                  return NavigationDecision.prevent;
+                }
+                else if(uri.path == "/history") {
+                  // 検索履歴
+                  final userDirectory = await getApplicationDocumentsDirectory();
+                  var histories = "";
+                  List<FileSystemEntity> files = userDirectory.listSync(recursive: true,followLinks: false);
+                  for (var file in files.reversed) {
+                    if(file.path.contains('jpg')) {
+                      // 画像データをBASE64エンコードし、imgタグに直接指定
+                      String img64 = base64Encode(File(file.path).readAsBytesSync());
+                      String fileName = file.path.split('/').last;
+                      histories += '<li><a href="https://cecile-dev.prm.bz/history_find/' +fileName+ '"><img src="data:image/jpeg;base64,'+img64+'"></a>';
+                    }
+                  }
+                  // HTMLの生成
+                  String historyPage = _historyPageHeader;
+                  if(histories != '') {
+                    historyPage += '<ul class="search_history">' + histories + '</ul>';
+                  }
+                  else{
+                    historyPage += '<div class="nodata">過去に撮影した写真はありません。</div>';
+                  }
+                  historyPage += _historyPageFooter;
+                  // 撮影履歴ページを表示
+                  _webViewController.loadUrl(Uri.dataFromString(
+                      historyPage,
+                      mimeType: 'text/html',
+                      encoding: Encoding.getByName('utf-8')
+                  ).toString());
                   return NavigationDecision.prevent;
                 }
                 else if(uri.path == "/camera"){
@@ -192,15 +260,36 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 else if(uri.path == "/gallery"){
                   // ギャラリーを起動
                   final _picker = ImagePicker();
-                  final _pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+                  final _pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxHeight: 640, maxWidth: 480, imageQuality: 80);
                   final path = _pickedFile!.path;
+                  final ext = path.split('.').last;
                   if(path != '') {
+                    // 画像データの選択があれば処理を行う
+
+                    // 画像データが指定数以上登録されている場合は、古い順に削除する
+                    String deletePath = '';
+                    var fileCnt = 0;
+                    for (var file in files) {
+                      if(file.path.contains('jpg')) {
+                        if(deletePath == '') deletePath = file.path;
+                        fileCnt++;
+                      }
+                    }
+
+                    // 撮影した画像をコピーする
+                    String tmpPath = (await getApplicationDocumentsDirectory()).path + '/' + new DateTime.now().millisecondsSinceEpoch.toString() + '.' + ext;
+                    File(path).copy(tmpPath);
+//                    final dir = Directory('/data/user/0/com.example.cecile/app_flutter1627954836551.jpg');
+//                    dir.deleteSync(recursive: true);
+
+                    // 検索中画面の表示
                     _webViewController.loadUrl(Uri.dataFromString(
                         _loadingPage,
                         mimeType: 'text/html',
                         encoding: Encoding.getByName('utf-8')
                     ).toString());
-                    // 画像データの選択があれば処理を行う
+
+                    // 画像データを転送する
                     try{
                       final dio = Dio();
                       dio.options.headers = {
