@@ -30,7 +30,8 @@ ul,ol{
 header{
   margin: 0px;
   padding: 0px;
-  height: 60px;
+  height: 80px;
+  text-align: center;
 }
   header img{
     position: absolute;
@@ -44,9 +45,8 @@ header{
   }
   header h3{
     display: inline-block;
-    line-height: 30px;
-    margin-left: 20px;
-    font-size: 16px;
+    line-height: 50px;
+    font-size: 18px;
     font-weight: normal;
     letter-spacing: 1px;
   }
@@ -69,7 +69,7 @@ header{
     height: 36px;
     border: solid 1px #dddddd;
     border-radius: 3px;
-    margin-top: 12px;
+    margin-top: 20px;
     margin-left: 10px;
   }
 
@@ -79,7 +79,7 @@ header{
     }
 
     header .searcharea .searchitem:nth-child(1) {
-      width: 100px;
+      width: 130px;
     }
 
     header .searcharea .searchitem:nth-child(1):before {
@@ -117,7 +117,7 @@ header{
     vertical-align: middle;
     background-color: transparent;
     font-size: 12px;
-    width: 100px;
+    width: 130px;
     height: 36px;
     cursor: pointer;
   }
@@ -127,7 +127,7 @@ header{
   }
 
   header .searcharea .searchitem:nth-child(2) {
-    width: 136px;
+    width: 166px;
     position: relative;
   }
 
@@ -210,6 +210,14 @@ header{
         left: 7px;
         color: #fff;
       }
+
+/* history
+---------------------------------------------------------- */
+div.history {
+  box-sizing: border-box;
+  width: 100%;
+}
+
 
 /* loading
 ---------------------------------------------------------- */
@@ -511,11 +519,12 @@ ol.settings{
   ol.settings li a{
     box-sizing: border-box;
     width: 100%;
-    padding: 0px 10px;
+    padding: 5px 10px;
+    padding-bottom: 10px;
     margin: 0px;
     display: grid;
     grid-gap: 10px;
-    grid-template-columns: 40px auto;
+    grid-template-columns: 35px auto;
   }
     ol.settings li{
       background-color: #f0f0f0;
@@ -530,7 +539,7 @@ ol.settings{
     }
       ol.settings li .icon i{
         position: absolute;
-        top: 10px;
+        top: 7px;
         left: 5px;
       }
       ol.settings li p{
@@ -542,10 +551,23 @@ ol.settings{
         padding-top: 10px;
       }
         ol.settings li p span{
-          color: #999;
-          font-size: 12px;
+          color: #555;
+          font-size: 13px;
         }
 
+/* div.search_history
+---------------------------------------------------------- */
+div.search_history {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 20px;
+}
+div.nodata {
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  padding: 20px 0px;
+}
 
 /* glid
 ---------------------------------------------------------- */
@@ -560,6 +582,9 @@ ul{
   grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
   grid-auto-rows: 260px;
 }
+div.search_history ul {
+  grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+}
 ul.footer{
   grid-auto-rows: 160px;
 }
@@ -572,7 +597,7 @@ ul.grid.ranking{
 }
 ul.grid.catalog{
   grid-template-columns: repeat(auto-fill, minmax(120px,1fr));
-  grid-auto-rows: 240px;
+  grid-auto-rows: 220px;
   grid-gap: 5px;
 }
   ul.grid.catalog p{
@@ -615,6 +640,9 @@ ul.grid.trend{
       border-top-right-radius: 10px;
       width: 100%;
       height: auto;
+    }
+    div.search_history ul li img {
+      border-radius: 10px;
     }
     ul li img.hosei{
       border-radius: 10px;
@@ -934,6 +962,7 @@ div#contents .title.catalog{
     width: 100%;
     color: #999;
   }
+  div.search_history .title,
   div.lenz .title{
     position: relative;
     text-align: left;
@@ -944,6 +973,7 @@ div#contents .title.catalog{
     padding-bottom: 10px;
     margin: auto auto;
   }
+    div.search_history .title i,
     div.lenz .title i{
       position: absolute;
       top: -2px;
@@ -1003,7 +1033,16 @@ ol.search_result{
           color: #999;
           font-size: 14px;
         }
-
+div.camera_main{
+  position: absolute;
+  top: 50%;
+  margin-top: -160px;
+  text-align: center;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+}
 div.camera{
   text-align: center;
   width: 100%;
@@ -1011,6 +1050,7 @@ div.camera{
   box-sizing: border-box;
   text-align: center;
 }
+  div.camera_main div.select_photo,
   div.camera div.select_photo{
     text-align: center;
     width: 140px;
@@ -1022,15 +1062,24 @@ div.camera{
     font-size: 14px;
     color: #fff;
   }
+    div.camera_main div.select_photo a,
     div.camera div.select_photo a{
       color: #fff;
     }
     div.camera div.select_photo i{
       color: #fff;
       font-size: 50px;
-      margin-top: 15px;
+      margin-top: 10px;
       margin-bottom: 10px;
     }
+    div.camera_main div.select_photo i{
+      color: #fff;
+      font-size: 50px;
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+  div.camera_main div.select_re,
+  div.camera_main div.select,
   div.camera div.select_re,
   div.camera div.select{
     width: 80%;
@@ -1039,6 +1088,8 @@ div.camera{
     display: grid;
     grid-template-columns: 50% 50%;
   }
+    div.camera_main div.select_re div,
+    div.camera_main div.select div,
     div.camera div.select_re div,
     div.camera div.select div{
       position: relative;
@@ -1046,10 +1097,14 @@ div.camera{
       font-size: 14px;
       line-height: 180%;
     }
+      div.camera_main div.select_re div i,
+      div.camera_main div.select div i,
       div.camera div.select_re div i,
       div.camera div.select div i{
         font-size: 40px;
       }
+  div.camera_main div.detail_re,
+  div.camera_main div.detail,
   div.camera div.detail_re,
   div.camera div.detail{
     width: 100%;
@@ -1057,18 +1112,36 @@ div.camera{
     border-radius: 10px;
     box-sizing: border-box;
     margin: auto auto;
-    margin-top: 60px;
+    margin-top: 30px;
     font-size: 14px;
     text-align: left;
     line-height: 150%;
     background-color: #eee;
   }
+  div.camera_main div.select_re,
   div.camera div.select_re{
     margin-top: 0px;
   }
+  div.camera_main div.detail_re,
   div.camera div.detail_re{
     margin-top: 15px;
   }
+  div.camera div.history_menu,
+  div.camera_main div.history_menu {
+    margin-top: 25px;
+  }
+    div.camera div.history_menu a,
+    div.camera_main div.history_menu a {
+      position: relative;
+      padding-left: 28px;
+      color: #555;
+    }
+      div.camera div.history_menu a i,
+      div.camera_main div.history_menu a i {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+      }
 
 div.lenz .history,
 div.lenz .feature,

@@ -36,6 +36,7 @@
 <li id="SettingBtn" class="cmnBtn">設定</li>
 <!--<li id="HelpBtn" class="cmnBtn">ヘルプ</li>-->
 <li id="SpAutoBtn" class="cmnBtn onlySp">自動再生</li>
+<li id="SpShareBtn" class="cmnBtn"><button>ページを共有する</button></li>
 <li id="SpBackBtn" class="cmnBtn onlySp">戻る</li>
 <li id="CloseBtn" class="cmnBtn"><span>メニューを</span>閉じる</li>
 </ul>
@@ -45,12 +46,12 @@
 <div id="MenuArea">
 <ul id="MenuList">
 <li id="MenuIndex"><span>もくじ</span></li>
+<li id="CatalogBtn" class="home"><span>カタログ<br>一覧</span></li>
 <li id="MenuVisualMenu"><span>ビジュアル<br>メニュー</span></li>
 <li id="MenuKeyword"><span>キーワード<br>検索</span></li>
 <li id="MenuTagList"><span>付箋<br>リスト</span></li>
 <li id="MenuFavorite"><span>お気に入り<br>ページ</span></li>
-<li id="MenuCatalog"><span>カタログ<br>メニュー</span></li>
-<li id="CatalogBtn"><span>カタログ<br>一覧</span></li>
+<li id="ShareBtn"><span>カタログ<br>メニュー</span></li>
 <li class="close">閉じる</li>
 </ul>
 <div id="MenuContentArea">
@@ -64,6 +65,17 @@
 <!--jsで要素を挿入-->
 </ul>
 </div><!--/IndexList-->
+
+<div id="CatalogMenu" class="menuContent scrollArea">
+<div class="header">
+<div class="closeBtn"></div>
+<h2>カタログメニュー</h2>
+</div>
+<ul class="visualList single">
+<!--jsで要素を挿入-->
+</ul>
+</div><!--/CatalogMenu-->
+
 <div id="VisualMenu" class="menuContent scrollArea">
 <div class="header">
 <div class="closeBtn"></div>
@@ -104,6 +116,15 @@
 <ul class="scrollArea">
 <!--jsで要素を挿入-->
 </ul>
+<div id="TagDeleteAll" class="spDialog">
+<div class="window">
+<p>全ページを削除しますか？</p>
+<ul class="taCenter">
+<li class="cmnBtn enter" style="padding: 3px 10px;">YES</li><li class="cmnBtn cancel" style="padding: 3px 10px;">NO</li>
+</ul>
+</div>
+</div>
+
 </div><!--/TagList-->
 
 <div id="FavoriteList" class="menuContent">
@@ -116,16 +137,6 @@
 <!--jsで要素を挿入-->
 </ul>
 </div><!--/FavoriteList-->
-
-<div id="CatalogMenu" class="menuContent scrollArea">
-<div class="header">
-<div class="closeBtn"></div>
-<h2>カタログメニュー</h2>
-</div>
-<ul class="visualList single">
-<!--jsで要素を挿入-->
-</ul>
-</div><!--/CatalogMenu-->
 
 
 </div><!--/MenuContentArea-->
@@ -199,8 +210,6 @@
 
 <div id="BtmArea">
 
-<div id="Logo"></div>
-
 <div id="Footer" class="clearfix">
 <div id="PageSliderArea">
 <div id="PageSlider">
@@ -213,10 +222,13 @@
 <li id="ZoomOutBtn">縮小</li>
 <li id="AutoBtn">自動再生</li>
 <li id="TagBtn">付箋</li>
+<li id="PageShareBtn">共有</li>
+<li id="PurchaseBtn">このページの<br>商品を購入</li>
 <li id="PenBtn">ペン</li>
 </ul>
 </div><!--
 --><div class="block">
+<!--
 <div id="PageJumpArea" class="page">
 <div class="text">ページ番号を入力</div>
 <form id="PageJump">
@@ -224,7 +236,7 @@
 <button class="cmnBtn">GO</button>
 </form>
 </div>
-</div><!--
+</div>--><!--
 --><div class="block spHide">
 <ul id="PageBtn">
 <li class="leftEnd">先頭へ</li>
@@ -265,15 +277,6 @@
 <li class="color3"></li>
 <li class="color4"></li>
 <li class="color5"></li>
-</ul>
-</div>
-</div>
-
-<div id="TagDeleteAll" class="spDialog">
-<div class="window">
-<p>全ページを削除しますか？</p>
-<ul class="taCenter">
-<li class="cmnBtn enter">YES</li><li class="cmnBtn cancel">NO</li>
 </ul>
 </div>
 </div>

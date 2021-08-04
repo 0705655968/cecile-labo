@@ -300,7 +300,7 @@ $(function(){
 		$('#TagBtn, #MenuTagList').toggleClass('hide', $('fusen', xml_contents).text()!=='1');
 		$('#PageJumpArea').toggleClass('hide', $('pageAssign', xml_contents).text()==='0');
 		$('#BackBtn, #SpBackBtn').toggleClass('hide', $('history', xml_contents).text()!=='1');
-		$('#UrlCopyBtn, #SpUrlCopy').toggleClass('hide', $('urlCopy', xml_contents).text()!=='1');
+//		$('#UrlCopyBtn, #SpUrlCopy').toggleClass('hide', $('urlCopy', xml_contents).text()!=='1');
 		$('#PenBtn').toggleClass('hide', $('penTool', xml_contents).text()!=='1');
 
 		if ($('#MenuList li:visible').length>=5){
@@ -1884,6 +1884,7 @@ $(function(){
 	  メニュー
 	-------------------------------------------------------------------------*/
 	$('#MenuList li').on('click', function(){
+		if ($(this).attr('id')=='CatalogBtn') return false;
 		if (isMaxWidth(767)){
 			closePenTool();
 			$('.menuContent').hide().eq($(this).index()).show();
@@ -2614,6 +2615,12 @@ $(function(){
 		}else{
 			window.open($('shoppingPage', xml_contents).attr('adress'));
 		}
+	});
+
+	// 共有
+	$('#PageShareBtn').on('click', function(){
+		var url = 'https://cecile-dev.prm.bz/share/fst/digicata/'+getUrlParam('code')+'/?directPage=' + (curPage+nombre);
+		location.href=url;
 	});
 
 	//このページのURLをコピー

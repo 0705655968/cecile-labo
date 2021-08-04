@@ -127,6 +127,7 @@ body {
 	top: 5px;
 	right: 5px;
 	z-index: 1000;
+	height: 35px;
 }
 #SpMenuBtn {
 	display: none;
@@ -239,7 +240,6 @@ body {
 	}
 	#SpMenuBtn {
 		position: relative;
-		display: block;
 		width: 35px;
 		height: 35px;
 		border-radius: 3px;
@@ -305,9 +305,11 @@ body {
 		border-top: 1px solid #fff;
 		padding-left: 40px !important;
 	}
+	#BtnList #SpShareBtn,
 	#BtnList #SpUrlCopy {
 		padding: 0 !important;
 	}
+	#BtnList #SpShareBtn button,
 	#BtnList #SpUrlCopy button {
 		border: none;
 		height: 37px;
@@ -488,6 +490,9 @@ body.openMenu #MenuArea {
 	font-weight: bold;
 	cursor: pointer;
 }
+#MenuList li.home {
+	background-color: #555;
+}
 #MenuList li:not(.close):hover:after {
 	content: "";
 	position: absolute;
@@ -567,6 +572,18 @@ body.openMenu #MenuList li.close {
 		writing-mode: horizontal-tb;
 		font-size: 10px;
 	}
+		#MenuList li#MenuTagList {
+			width: 50px;
+		}
+		#MenuList li#CatalogBtn {
+			width: 60px;
+		}
+		#MenuList li#MenuFavoriteBtn {
+			width: 70px;
+		}
+		#MenuList li#MenuVisualMenu {
+			width: 70px;
+		}
 	#MenuList li:not(.close):hover:after {
 		display: none;
 	}
@@ -738,6 +755,7 @@ body.openMenu #MenuList li.close {
 	height: 100%;
 	padding: 40px 0 0;
 	box-sizing: border-box;
+	z-index: 3;
 }
 #TagList .deleteAll {
 	position: absolute;
@@ -1748,6 +1766,10 @@ body.hasLogo #Footer {
 	background: url(../img/btn_ico_home.png) no-repeat 50% 4px;
 	background-size: 18px 18px;
 }
+#PageShareBtn {
+	background: url(../img/btn_ico_share.png) no-repeat 50% 4px;
+	background-size: 16px auto;
+}
 #ZoomInBtn {
 	background: url(../img/btn_ico_zoomin.png) no-repeat 50% 4px;
 	background-size: 18px 18px;
@@ -1998,11 +2020,7 @@ body.hasLogo #Footer {
 		opacity: 1;
 	}
 	#Footer .block.spHide,
-	#Footer #AutoBtn,
-	#Footer #BackBtn,
-	#Footer #FavoriteBtn,
-	#Footer #PurchaseBtn,
-	#Footer #UrlCopyBtn {
+	#Footer #FavoriteBtn {
 		display: none;
 	}
 }

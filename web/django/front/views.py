@@ -15,7 +15,7 @@ class ViewerView(View):
 
 class DesignView(View):
     def get(self, request, *args, **kwargs):
-        self.template_name = "front/sample/14101.html"
+        self.template_name = "front/load.html"
         return render(self.request, self.template_name)
 
 class CatalogView(View):
