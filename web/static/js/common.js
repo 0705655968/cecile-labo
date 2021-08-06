@@ -126,7 +126,35 @@ $(function() {
 
 
   sideCategory()
+  feature()
 });
+
+/* ----------------------------------------------------------
+feature
+---------------------------------------------------------- */
+var feature = function () {
+  var $featureBox = $('#feature');
+  $featureBox
+  .children('ul').addClass('swiper-wrapper')
+  .wrapAll('<div class="swiper-container"/>')
+  .children('li').addClass('swiper-slide');
+
+  var featureslider = new Swiper ($featureBox.children('.swiper-container'), {
+    loop: false,
+    freeMode: true,
+    slidesPerView: 'auto',
+    navigation: false,
+    spaceBetween: 10,
+    slidesOffsetBefore: 10,
+    slidesOffsetAfter: 10,
+    watchOverflow: true,
+    on: {
+      imagesReady: function(){
+        $featureBox.find('.feature-image img').addClass('is-visible');
+      }
+    }
+  });
+}
 
 /* ----------------------------------------------------------
   sideCategory

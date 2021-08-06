@@ -10,6 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 void main() {
   runApp(CecileApp());
@@ -52,9 +53,18 @@ class _WebViewScreenState extends State<WebViewScreen> {
   final _unselectedItemColor = Color.fromRGBO(99, 99, 99, 1.0);
   final _selectedBgColor = Color.fromRGBO(173, 32, 32, 1.0);
   final _unselectedBgColor = Colors.white;
-  final _loadingPage = '<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="https://cecile-dev.prm.bz/static/css/common.css?v=0002"></head><body><div id="contents"><header><h3>カタログ画像検索</h3></header><div class="loading"><i class="material-icons">image_search</i><br />商品検索中..</div></body></html>';
-  final _historyPageHeader = '<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="https://cecile-dev.prm.bz/static/css/common.css"></head><body><div id="contents"><header><h3>カタログ画像検索</h3></header><div class="search_history"><div class="title"><i class="material-icons submit">history</i>検索履歴</div>';
-  final _historyPageFooter = '<br style="clear:both;"/><div class="title"><i class="material-icons submit">search</i>検索</div></div><div class="camera"><div class="select_photo"><div><div class="camera"><a href="https://cecile-dev.prm.bz/gallery"><i class="material-icons">add_a_photo</i><br />写真を撮る</a></div></div></div><div class="detail_re"><p>検索を行われる場合、上のカメラアイコンを選択し、検索する写真を撮影してください。</p></div></div></div></body></html>';
+
+  // 検索履歴画面(ヘッダー)
+  final _historyPageHeader = '''
+    <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cecile-dev.prm.bz/static/css/common.css"></head>
+    <body><div id="contents"><header><h3>カタログ画像検索</h3></header>
+    <div class="search_history"><div class="title"><i class="material-icons submit">history</i>検索履歴</div>''';
+  // 検索履歴画面(フッター)
+  final _historyPageFooter = '''
+    <br style="clear:both;"/><div class="title"><i class="material-icons submit">search</i>検索</div></div><div class="camera"><div class="select_photo"><div>
+    <div class="camera"><a href="https://cecile-dev.prm.bz/gallery"><i class="material-icons">add_a_photo</i><br />写真を撮る</a></div></div></div>
+    <div class="detail_re"><p>検索を行われる場合、上のカメラアイコンを選択し、検索する写真を撮影してください。</p></div></div></div></body></html>''';
 
   @override
   void initState() {
@@ -75,9 +85,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
   // 検索中画面の表示
   Future<void> _onFindingDisplay() async {
     _webViewController.loadUrl(Uri.dataFromString(
-        _loadingPage,
-        mimeType: 'text/html',
-        encoding: Encoding.getByName('utf-8')
+      await rootBundle.loadString('assets/html/wait.html'),
+      mimeType: 'text/html',
+      encoding: Encoding.getByName('utf-8')
     ).toString());
   }
 
@@ -218,305 +228,218 @@ class _WebViewScreenState extends State<WebViewScreen> {
         ),
       ),
       body: Stack(
-          children: <Widget>[
-            WebView(
-              initialUrl: initialUrl,
-              // jsを有効化
-              javascriptMode: JavascriptMode.unrestricted,
-              // controllerを登録
-              onWebViewCreated: (WebViewController webViewController) {
-                _webViewController = webViewController;
-              },
-              /*
-            // ページの読み込み開始
-            onPageStarted: (finish) {
-              setState(() {
-                _isLoading = true;
-              });
+        children: <Widget>[
+          WebView(
+            initialUrl: initialUrl,
+            // jsを有効化
+            javascriptMode: JavascriptMode.unrestricted,
+            // controllerを登録
+            onWebViewCreated: (WebViewController webViewController) {
+              _webViewController = webViewController;
             },
-            // ページ読み込み終了
-            onPageFinished: (finish) {
-              setState(() {
-                _isLoading = false;
-              });
+            // リソースの読み込みエラー
+            onWebResourceError: (error) async {
+              _webViewController.loadUrl(Uri.dataFromString(
+                await rootBundle.loadString('assets/html/error.html'),
+                mimeType: 'text/html',
+                encoding: Encoding.getByName('utf-8')
+              ).toString());
             },
-            */
-              navigationDelegate: (request) async {
-                // 初期URLやiFlameのURL、CSSのlink relの要素を除外する
-                if ((!request.isForMainFrame) || (initialUrl == request.url)) {
-                  return NavigationDecision.navigate;
-                }
-                // ブラウザで開くリンクの判別
-                final uri = Uri.parse(request.url);
-                if(_debug) print(uri.path);
-                if(uri.path == "/push_settings"){
-                  // アプリ設定画面へ移動
-                  openAppSettings();
-                  return NavigationDecision.prevent;
-                }
-                else if(uri.path.contains('share')) {
-                  // 共有処理
+            navigationDelegate: (request) async {
+              // 初期URLやiFlameのURL、CSSのlink relの要素を除外する
+              if ((!request.isForMainFrame) || (initialUrl == request.url)) {
+                return NavigationDecision.navigate;
+              }
+              // ブラウザで開くリンクの判別
+              final uri = Uri.parse(request.url);
+              if(_debug) print(uri.path);
+              if(uri.path == "/push_settings"){
+                // アプリ設定画面へ移動
+                openAppSettings();
+                return NavigationDecision.prevent;
+              }
+              else if(uri.path.contains('share')) {
+                // 共有処理
 
-                  // URLを正規の形に変更する
-                  String shareUrl = uri.toString().replaceAll('cecile-dev.prm.bz/share', 'cecile.co.jp');
-                  await Share.share(shareUrl);
+                // URLを正規の形に変更する
+                String shareUrl = uri.toString().replaceAll('cecile-dev.prm.bz/share', 'cecile.co.jp');
+                await Share.share(shareUrl);
 
-                  return NavigationDecision.prevent;
+                return NavigationDecision.prevent;
+              }
+              else if(uri.path.contains('history_find')) {
+                // 過去の写真での再検索
+
+                // ファイルパスの生成
+                final userDirectory = await getApplicationDocumentsDirectory();
+                String imgFile = userDirectory.path + '/' + uri.path.split('/').last;
+
+                // 検索中画面の表示
+                await _onFindingDisplay();
+
+                // 画像検索処理
+                _onSimilar(imgFile, true);
+                return NavigationDecision.prevent;
+              }
+              else if(uri.path == "/history") {
+
+                // 検索履歴
+                try{
+                  // 撮影履歴ページを表示
+                  _webViewController.loadUrl(Uri.dataFromString(
+                    await _onHistoryList(),
+                    mimeType: 'text/html',
+                    encoding: Encoding.getByName('utf-8')
+                  ).toString());
+                } catch (err) {
+                  // ページ表示にエラーが発生したので、エラーメッセージを表示し、カタログ画像検索のメイン画面に遷移する
+                  _onWebPageByErrMsg("検索履歴情報の取得時にエラーが発生しました。\nカタログ画像検索画面から再度処理を行ってください。", 2);
                 }
-                else if(uri.path.contains('history_find')) {
-                  // 過去の写真での再検索
+                return NavigationDecision.prevent;
 
-                  // ファイルパスの生成
+              }
+              else if(uri.path == "/gallery"){
+                // カメラを起動
+                final _picker = ImagePicker();
+                // ImageSource.camera / ImageSource.gallery
+                final _pickedFile = await _picker.pickImage(source: ImageSource.camera, maxHeight: 640, maxWidth: 480, imageQuality: 80);
+                final path = _pickedFile!.path;
+                final ext = path.split('.').last;
+                if(path != '') {
+                  // 画像データの選択があれば処理を行う
+
+                  // 画像データが指定数以上登録されている場合は、古い順に削除する
+                  String deletePath = '';
+                  int fileCnt = 0;
                   final userDirectory = await getApplicationDocumentsDirectory();
-                  String imgFile = userDirectory.path + '/' + uri.path.split('/').last;
+                  List<FileSystemEntity> files = userDirectory.listSync(recursive: true,followLinks: false);
+                  for (var file in files) {
+                    if(file.path.contains('jpg')) {
+                      if(deletePath == '') deletePath = file.path;
+                      fileCnt++;
+                    }
+                  }
+                  // 保存画像が指定数以上なら、古いデータを削除する
+                  if(fileCnt >= _saveImageMax) {
+                    final dir = Directory(deletePath);
+                    dir.deleteSync(recursive: true);
+                  }
+                  // 撮影した画像をユーザー領域へコピーする
+                  String tmpPath = (await getApplicationDocumentsDirectory()).path + '/' + DateFormat('yyyyMMddHHmmss').format(DateTime.now()) + '.' + ext;
+                  File(path).copy(tmpPath);
+                  if(_debug) print(tmpPath);
 
                   // 検索中画面の表示
                   await _onFindingDisplay();
 
                   // 画像検索処理
-                  _onSimilar(imgFile, true);
-                  /*
-                  try{
-                    final dio = Dio();
-                    dio.options.headers = {
-                      'Content-Type': 'application/x-www-form-urlencoded'
-                    };
-                    var formData = FormData.fromMap({
-                      'file': await MultipartFile.fromFile(imgFile)
-                    });
-                    final response = await dio.post(
-                      'https://cecile-dev.prm.bz/similar',
-                      data: formData,
-                    );
-                    _webViewController.loadUrl(Uri.dataFromString(
-                        response.data,
-                        mimeType: 'text/html',
-                        encoding: Encoding.getByName('utf-8')
-                    ).toString());
-                  } catch (err) {
-                    print('uploading error: $err');
-                  }
-                  */
-                  return NavigationDecision.prevent;
+                  _onSimilar(path, false);
                 }
-                else if(uri.path == "/history") {
-
-                  // 検索履歴
-                  try{
-                    // 撮影履歴ページを表示
-                    _webViewController.loadUrl(Uri.dataFromString(
-                        await _onHistoryList(),
-                        mimeType: 'text/html',
-                        encoding: Encoding.getByName('utf-8')
-                    ).toString());
-                  } catch (err) {
-                    // ページ表示にエラーが発生したので、エラーメッセージを表示し、カタログ画像検索のメイン画面に遷移する
-                    _onWebPageByErrMsg("検索履歴情報の取得時にエラーが発生しました。\nカタログ画像検索画面から再度処理を行ってください。", 2);
-                  }
-                  return NavigationDecision.prevent;
-
-                }
-                /*
-                else if(uri.path == "/camera"){
-                  // カメラを起動
-                  final _picker = ImagePicker();
-                  final _pickedFile = await _picker.pickImage(source: ImageSource.camera);
-                  final path = _pickedFile!.path;
-                  if(path != '') {
-                    _webViewController.loadUrl(Uri.dataFromString(
-                        _loadingPage,
-                        mimeType: 'text/html',
-                        encoding: Encoding.getByName('utf-8')
-                    ).toString());
-                    // 画像データの選択があれば処理を行う
-                    try{
-                      final dio = Dio();
-                      dio.options.headers = {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                      };
-                      var formData = FormData.fromMap({
-                        'file': await MultipartFile.fromFile(path)
-                      });
-                      final response = await dio.post(
-                        'https://cecile-dev.prm.bz/similar',
-                        data: formData,
-                      );
-                      _webViewController.loadUrl(Uri.dataFromString(
-                          response.data,
-                          mimeType: 'text/html',
-                          encoding: Encoding.getByName('utf-8')
-                      ).toString());
-                    } catch (err) {
-                      print('uploading error: $err');
-                    }
-                  }
-                  return NavigationDecision.prevent;
-                }
-                */
-                else if(uri.path == "/gallery"){
-                  // カメラを起動
-                  final _picker = ImagePicker();
-                  final _pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxHeight: 640, maxWidth: 480, imageQuality: 80);
-                  final path = _pickedFile!.path;
-                  final ext = path.split('.').last;
-                  if(path != '') {
-                    // 画像データの選択があれば処理を行う
-
-                    // 画像データが指定数以上登録されている場合は、古い順に削除する
-                    String deletePath = '';
-                    int fileCnt = 0;
-                    final userDirectory = await getApplicationDocumentsDirectory();
-                    List<FileSystemEntity> files = userDirectory.listSync(recursive: true,followLinks: false);
-                    for (var file in files) {
-                      if(file.path.contains('jpg')) {
-                        if(deletePath == '') deletePath = file.path;
-                        fileCnt++;
-                      }
-                    }
-                    // 保存画像が指定数以上なら、古いデータを削除する
-                    if(fileCnt >= _saveImageMax) {
-                      final dir = Directory(deletePath);
-                      dir.deleteSync(recursive: true);
-                    }
-                    // 撮影した画像をユーザー領域へコピーする
-                    String tmpPath = (await getApplicationDocumentsDirectory()).path + '/' + DateFormat('yyyyMMddHHmmss').format(DateTime.now()) + '.' + ext;
-                    File(path).copy(tmpPath);
-                    if(_debug) print(tmpPath);
-
-                    // 検索中画面の表示
-                    await _onFindingDisplay();
-
-                    // 画像検索処理
-                    _onSimilar(path, false);
-                    /*
-                    // 画像データを転送する
-                    try{
-                      final dio = Dio();
-                      dio.options.headers = {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                      };
-                      var formData = FormData.fromMap({
-                        'file': await MultipartFile.fromFile(path)
-                      });
-                      final response = await dio.post(
-                        'https://cecile-dev.prm.bz/similar',
-                        data: formData,
-                      );
-                      _webViewController.loadUrl(Uri.dataFromString(
-                          response.data,
-                          mimeType: 'text/html',
-                          encoding: Encoding.getByName('utf-8')
-                      ).toString());
-                    } catch (err) {
-                      print('uploading error: $err');
-                    }
-                    */
-                  }
-                  return NavigationDecision.prevent;
-                }
-                else if(uri.path == "/data_reset"){
-                  // アプリ内のデータをリセット
-                  // 削除確認ダイアログを表示
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title :Text('データ削除確認'),
-                      content: Text('アプリ内で保持しているデータを削除してもよろしいですか？'
-                        , style: TextStyle(fontSize: 14, color: _unselectedItemColor)),
-                      actions: <Widget>[
-                        FlatButton(
-                          child: Text('キャンセル'),
-                          onPressed: () => Navigator.of(context).pop(1),
-                        ),
-                        FlatButton(
-                          child: Text('削除'),
-                          onPressed: () async {
-                            Navigator.of(context).pop(1);
-                            // WebViewのCookieを削除
-                            await CookieManager().clearCookies();
-                            // 画像検索履歴データの削除
-                            final userDirectory = await getApplicationDocumentsDirectory();
-                            List<FileSystemEntity> files = userDirectory.listSync(recursive: true,followLinks: false);
-                            for (var file in files) {
-                              if(file.path.contains('jpg')) {
-                                Directory(file.path).deleteSync(recursive: true);
-                              }
+                return NavigationDecision.prevent;
+              }
+              else if(uri.path == "/data_reset"){
+                // アプリ内のデータをリセット
+                // 削除確認ダイアログを表示
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title :Text('データ削除確認'),
+                    content: Text('アプリ内で保持しているデータを削除してもよろしいですか？'
+                      , style: TextStyle(fontSize: 14, color: _unselectedItemColor)),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text('キャンセル'),
+                        onPressed: () => Navigator.of(context).pop(1),
+                      ),
+                      FlatButton(
+                        child: Text('削除'),
+                        onPressed: () async {
+                          Navigator.of(context).pop(1);
+                          // WebViewのCookieを削除
+                          await CookieManager().clearCookies();
+                          // 画像検索履歴データの削除
+                          final userDirectory = await getApplicationDocumentsDirectory();
+                          List<FileSystemEntity> files = userDirectory.listSync(recursive: true,followLinks: false);
+                          for (var file in files) {
+                            if(file.path.contains('jpg')) {
+                              Directory(file.path).deleteSync(recursive: true);
                             }
-                            // 完了メッセージを表示
-                            showDialog(
-                              context: context,
-                              builder: (_) => _buildDialog(
-                                '削除完了', 'カタログ画像検索、デジタルカタログに関連するデータを削除しました。', 'OK'
-                              )
-                            );
-                          },
-                        ),
-                      ],
-                    )
-                  );
-                  return NavigationDecision.prevent;
-                }
-                else if(uri.path == "/cache_reset") {
-                  // WebViewのキャッシュを削除(Androidのみ)
+                          }
+                          // 完了メッセージを表示
+                          showDialog(
+                            context: context,
+                            builder: (_) => _buildDialog(
+                              '削除完了', 'カタログ画像検索、デジタルカタログに関連するデータを削除しました。', 'OK'
+                            )
+                          );
+                        },
+                      ),
+                    ],
+                  )
+                );
+                return NavigationDecision.prevent;
+              }
+              else if(uri.path == "/cache_reset") {
+                // WebViewのキャッシュを削除(Androidのみ)
 
-                  // キャッシュクリア確認ダイアログを表示
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title :Text('キャッシュ削除確認'),
-                      content: Text('キャッシュデータを削除してもよろしいですか？'
-                        , style: TextStyle(fontSize: 14, color: _unselectedItemColor)),
-                      actions: <Widget>[
-                        FlatButton(
-                          child: Text('キャンセル'),
-                          onPressed: () => Navigator.of(context).pop(1),
-                        ),
-                        FlatButton(
-                          child: Text('削除'),
-                          onPressed: () async {
-                            Navigator.of(context).pop(1);
-                            // キャッシュデータの削除
-                            await _webViewController.clearCache();
-                            // 完了メッセージを表示
-                            showDialog(
-                              context: context,
-                              builder: (_) => _buildDialog(
-                                'クリア完了', 'アプリ内のキャッシュデータの削除が正常に完了しました。', 'OK'
-                              )
-                            );
-                          },
-                        ),
-                      ],
-                    )
+                // キャッシュクリア確認ダイアログを表示
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title :Text('キャッシュ削除確認'),
+                    content: Text('キャッシュデータを削除してもよろしいですか？'
+                      , style: TextStyle(fontSize: 14, color: _unselectedItemColor)),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text('キャンセル'),
+                        onPressed: () => Navigator.of(context).pop(1),
+                      ),
+                      FlatButton(
+                        child: Text('削除'),
+                        onPressed: () async {
+                          Navigator.of(context).pop(1);
+                          // キャッシュデータの削除
+                          await _webViewController.clearCache();
+                          // 完了メッセージを表示
+                          showDialog(
+                            context: context,
+                            builder: (_) => _buildDialog(
+                              'クリア完了', 'アプリ内のキャッシュデータの削除が正常に完了しました。', 'OK'
+                            )
+                          );
+                        },
+                      ),
+                    ],
+                  )
+                );
+                return NavigationDecision.prevent;
+              }
+              else if (browserLinkList.indexOf(uri.host) >= 0) {
+                if (await canLaunch(request.url)) {
+                  // 外部ブラウザで遷移
+                  await launch(
+                    request.url,
+                    forceSafariVC: false,
                   );
-                  return NavigationDecision.prevent;
                 }
-                else if (browserLinkList.indexOf(uri.host) >= 0) {
-                  if (await canLaunch(request.url)) {
-                    // 外部ブラウザで遷移
-                    await launch(
-                      request.url,
-                      forceSafariVC: false,
-                    );
-                  }
-                  // 何もしない
-                  return NavigationDecision.prevent;
-                }
-                // WebView内で遷移
-                if(uri.path == "/settings"){
-                  if(_debug) print("init");
-                  print(_selectedIndex);
-                  _isActive = true;
-                  _onItemTapped(_selectedIndex);
-                  _isActive = false;
-                }
-                return NavigationDecision.navigate;
-              },
-            ),
-            // ページ読み込み中の時はIndicatorを出す
-            _isLoading ? Center( child: CircularProgressIndicator())
-                : Stack(),
-          ]
+                // 何もしない
+                return NavigationDecision.prevent;
+              }
+              // WebView内で遷移
+              if(uri.path == "/settings"){
+                if(_debug) print("init");
+                print(_selectedIndex);
+                _isActive = true;
+                _onItemTapped(_selectedIndex);
+                _isActive = false;
+              }
+              return NavigationDecision.navigate;
+            },
+          ),
+          // ページ読み込み中の時はIndicatorを出す
+          _isLoading ? Center( child: CircularProgressIndicator())
+            : Stack(),
+        ]
       ),
       bottomNavigationBar: Container(
         margin: EdgeInsets.only(top: 0, bottom: 0),

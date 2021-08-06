@@ -850,6 +850,14 @@ div.trend{
     line-height: 20px;
   }
 
+div.top_banner{
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0px 5px;
+  margin: 0px;
+  margin-top: 0px;
+  margin-bottom: 25px;
+}
 
 div.buyer{
   box-sizing: border-box;
@@ -858,12 +866,14 @@ div.buyer{
   margin: 0px;
   margin-bottom: 40px;
 }
+  div.top_banner img,
   div.buyer img{
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     width: 100%;
     height: auto;
   }
+  div.top_banner a,
   div.buyer a{
     color: #000;
     padding: 0px;
@@ -979,6 +989,67 @@ div#contents .title.catalog{
       top: -2px;
       left: 0px;
     }
+
+/* feature
+---------------------------------------------------------- */
+.feature {
+    position: relative;
+    margin: 20px auto 0;
+    padding-top: 5px;
+    padding-bottom: 0px;
+    width: 100%;
+    height: calc(100vw * 250 / 750);
+}
+
+.featurebox.sliderwrap {
+    overflow: hidden;
+    position: relative;
+}
+
+.feature .swiper-container {
+    height: calc(100vw * 250 / 750);
+}
+
+.featurebox.sliderwrap ul {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    width: auto;
+}
+
+.featurebox.sliderwrap ul > li {
+    width: 28%;
+    margin: 0;
+    min-width: 105px;
+    position: relative;
+}
+
+.featurebox.sliderwrap ul > li > a {
+    overflow: hidden;
+    display: block;
+    border-radius: 8px;
+}
+
+.featurebox.sliderwrap .feature-image {
+    margin: 0;
+}
+
+.featurebox.sliderwrap .feature-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    opacity: 0;
+}
+
+.featurebox.sliderwrap .feature-image img.is-visible {
+    opacity: 1;
+}
+
+.featurebox.sliderwrap .custom-control {
+    display: none;
+}
 
 /* settings
 ---------------------------------------------------------- */
