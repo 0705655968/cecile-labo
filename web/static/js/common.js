@@ -22,6 +22,28 @@
 
 $(document).ready(function(){
   slider()
+  if(nid = params('nid')){
+    console.log(nid)
+    $.ajax({
+      url : '/static/data/whatsnew.xml',
+      dataType : 'xml',
+      cache : false,
+      success : function(data) {
+        $(data).find("whatsnew").find("topic").each(function(){
+          if($(this).find('id').text()==nid){
+            let html = '<a href="'+$(this).find('link').text()+'">' +
+                       '<img src="'+$(this).find('img').text()+'">' +
+                       '<p>'+$(this).find('title').text()+'</p></a>' +
+                       '<div class="closebtn">閉じる</div>'
+            $('div.popup').html(html)
+            $('div.popup').show()
+            $('div.dammy').show()
+            return false
+          }
+        })
+      }
+    })
+  }
 })
 $(function() {
   $('div#toolbar td').on('click',function(){
@@ -33,6 +55,12 @@ $(function() {
     $(this).addClass('active')
     $('.'+disp).show()
   });
+  $('div.popup').on('click', 'div.closebtn', function(){
+    $('div.dammy,div.popup').hide()
+  })
+  $('div.dammy').on('click',function(){
+    $('div.dammy,div.popup').hide()
+  })
   $('div.catalog span').on('click',function(){
     let item = $(this).attr('item'),
       max = $(this).attr('max')

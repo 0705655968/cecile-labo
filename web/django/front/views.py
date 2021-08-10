@@ -8,6 +8,14 @@ from PIL import Image
 import imagehash
 
 
+class DegitalcatalogView(View):
+    def get(self, request, *args, **kwargs):
+        self.template_name = "front/viewer.html"
+        context = {
+            'code': '15101',
+        }
+        return render(self.request, self.template_name)
+
 class ViewerView(View):
     def get(self, request, *args, **kwargs):
         self.template_name = "front/viewer.html"
@@ -95,6 +103,7 @@ class HomeView(View):
         self.template_name = "front/home.html"
         return render(self.request, self.template_name)
 
+degitalcatalog = DegitalcatalogView.as_view()
 viewer = ViewerView.as_view()
 design = DesignView.as_view()
 catalog = CatalogView.as_view()

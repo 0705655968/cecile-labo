@@ -31,8 +31,9 @@ class Command(BaseCommand):
             exit()
 
         # カタログマスタの更新
+        #update_catalog_from_bat()
         create_catalog_from_bat()
         # カタログページデータの更新
-        #create_catalog_data()
+        create_catalog_data()
         # カタログページデータ内の商品一覧の更新
-        #create_catalog_Page_items()
+        create_catalog_Page_items()

@@ -12,8 +12,8 @@ from . import date
 # 定数
 TEMPLATE_DIR = '/opt/app/cecile/front/templates/front/'
 NEWS_PAGE = TEMPLATE_DIR+'news.html'
-HOME_PAGE = TEMPLATE_DIR+'home2.html'
-WHATS_NEW = 'http://special.cecile.co.jp/app/xml/apphome.xml'
+HOME_PAGE = TEMPLATE_DIR+'home.html'
+WHATS_NEW = 'https://www.cecile.co.jp/component/app/xml/whatsnew.xml'
 CECILE_TOP = 'https://www.cecile.co.jp/'
 CECILE_HOME = 'https://www.cecile.co.jp'
 
@@ -24,20 +24,13 @@ def updates_news_page():
   data = web.get(WHATS_NEW)
   xml_org = data["src"].decode('shift_jis')
   xml = parser.xml(xml_org)
-  keyvisual = ''
   news = ''
-  if xml['sdAppHome']['keyvisual']:
-    tmp = xml['sdAppHome']['keyvisual']
-    keyvisual = '<div class="keyvisual">'
-    keyvisual += '<a href="'+str(tmp['url'])+'?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">'
-    keyvisual += '<img src="'+str(tmp['img']['sp'])+'"></a></div>'
-  
   tmp = ''
   for data in xml['sdAppHome']['whatsnew']['topic']:
     link = str(data['link']).replace('http:', 'https:')
     img = str(data['img']).replace('http:', 'https:')
     title = data['title']
-    news_date = data['date']
+    news_date = data['startdate'][0:10]
     tmp += '<li><a href="'+link+'?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">'
     tmp += '<img src="'+img+'"><div><p>'+title+'</p>'
     tmp += '<p><span>'+news_date+'</span></p>'
@@ -46,11 +39,11 @@ def updates_news_page():
     news = '<ul class="news">'+tmp+'</ul>'
   
   # 作成したデータを保存
-  save_news_page(keyvisual=keyvisual, news=news)
+  save_news_page(news=news)
 
 
 # 新着情報ページを保存
-def save_news_page(keyvisual, news):
+def save_news_page(news):
   html = '''<!doctype html>
 <html lang="ja">
 <head>
@@ -66,11 +59,7 @@ def save_news_page(keyvisual, news):
   <div id="contents">
     <header>
       <h3>新着情報</h3>
-      <div class="settings">
-        <a href="settings"><i class="material-icons submit">settings</i></a>
-      </div>
     </header>'''
-  html += keyvisual
   html += news
   html += '''
   </div>
@@ -87,51 +76,280 @@ def updates_home_page():
   html = parser.content(data["src"])
   # データの初期化
   pickup = ''
+  keyvisual = ''
+  feature = ''
+  banner = ''
+  buyer = ''
+  coordinate = ''
+  ranking = ''
+  param = 'L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app'
+  rankings = [
+    'lady','inner','men','living','beauty','kids','uniform','big'
+  ]
 
+  # キービジュアル
+  block = parser.attr(html, "div", ["id", "mod-top-keyvisual"])
+  items = parser.attr(block, "div", ["class", "box-container"],1)
+  tmp = ''
+  for item in items:
+    uri = ''
+    try:
+      href = parser.string(parser.attribute(parser.tag(item, "a"), "href"))
+      if href:
+        uri = CECILE_HOME+href
+    except: pass
+    image = ''
+    try:
+      image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src"))
+      if image_src:
+        image = CECILE_HOME+image_src
+        tmp += '<div class="swiper-slide"><a href="'+uri+'?'+param+'"><img src="'+image+'" alt=""></a></div>'
+    except: pass
+
+  if tmp:
+    keyvisual = '''
+      <div class="swiper-container key-visual-slider">
+        <div class="swiper-wrapper">
+'''
+    keyvisual += tmp
+    keyvisual += '''
+        </div>
+      </div>
+'''
+
+  # 特集
+  block = parser.attr(html, "div", ["id", "feature"])
+  items = parser.tag(block, "li",1)
+  tmp = ''
+  for item in items:
+    uri = ''
+    try:
+      href = parser.string(parser.attribute(parser.tag(item, "a"), "href"))
+      if href:
+        uri = CECILE_HOME+href
+    except: pass
+    image = ''
+    try:
+      image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src"))
+      if image_src:
+        image = CECILE_HOME+image_src
+        tmp += '<li><a href="'+uri+'?'+param+'"><figure class="feature-image"><img src="'+image+'" width="383" height="383" decoding="async"></figure></a></li>'
+    except: pass
+
+  if tmp:
+    feature = '''
+      <div class="feature">
+        <div id="feature" class="featurebox sliderwrap">
+          <ul class="feature-slider"> 
+'''
+    feature += tmp
+    feature += '''
+          </ul>
+          <div class="custom-control">
+            <div class="btn-prev-feature" tabindex="0" role="button" aria-label="Previous slide" aria-disabled="true"></div>
+            <div class="btn-next-feature" tabindex="0" role="button" aria-label="Next slide" aria-disabled="false"></div>
+          </div>
+        </div>
+      </div>
+'''
+  
+  # トップバナー
+  block = parser.attr(html, "figure", ["class", "topbanner-image"])
+  if block:
+    uri = ''
+    try:
+      href = parser.string(parser.attribute(parser.tag(item, "a"), "href"))
+      if href:
+        uri = CECILE_HOME+href
+    except: pass
+    try:
+      image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src")).replace('383_383','1200_480')
+      if image_src:
+        image = CECILE_HOME+image_src
+        banner = '<div class="top_banner"><a href="'+uri+'?'+param+'"><img src="'+image+'"></a></div>'
+    except: pass
+  
   # ピックアップ情報
   block = parser.attr(html, "section", ["id", "rt_conomi_special_top"])
   items = parser.tag(block, "li", 1)
   tmp = ''
   for item in items:
-    title = parser.string(parser.tag(item, "span"))
-
-    image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src"))
+    title = ''
+    try:
+      title = parser.string(parser.tag(item, "span"))
+    except: pass
     image = ''
-    if image_src:
-      image = CECILE_HOME+image_src
-    
-    href = parser.string(parser.attribute(parser.attr(item, "a", ["class", "card-inner"]), "href"))
+    try:
+      image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src"))
+      if image_src:
+        image = CECILE_HOME+image_src
+    except: pass
     uri = ''
-    if href:
-      uri = CECILE_HOME+href
-    
-    genre = parser.string(parser.tag(parser.attr(item, "p", ["class", "text-category"]), "a"))
+    try:
+      href = parser.string(parser.attribute(parser.attr(item, "a", ["class", "card-inner"]), "href"))
+      if href:
+        uri = CECILE_HOME+href
+    except: pass
+    genre = ''
+    try:
+      genre = parser.string(parser.tag(parser.attr(item, "p", ["class", "text-category"]), "a"))
+    except: pass
 
-    tmp += '<li><a href="'+uri+'?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">'
-    if image:
-      tmp += '<img src="'+image+'">'
-    tmp += '<p>'+title+'</p>'
-    tmp += '<p><span>'+genre+'</span></p></a>'
-
+    if uri:
+      tmp += '<li><a href="'+uri+'?'+param+'">'
+      if image:
+        tmp += '<img src="'+image+'">'
+      tmp += '<p>'+title+'</p>'
+      tmp += '<p><span>'+genre+'</span></p></a>'
+ 
   if tmp:
-    html = '''
+    pickup = '''
       <div class="title">ピックアップ特集</div>
       <ul class="grid">
 '''
-
-
-    html += '''
+    pickup += tmp
+    pickup += '''
       </ul>
       <div class="allview">
-        <a href="https://www.cecile.co.jp/sc/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">
+'''
+    pickup += '<a href="https://www.cecile.co.jp/sc/?'+param+'">'
+    pickup += '''
           <div>すべての特集を見る</div>
           <div class="icon"><i class="material-icons">chevron_right</i></div>
         </a>
       </div>
 '''
 
+  # バイヤー厳選
+  block = parser.attr(html, "section", ["id", "atrec_pickupcmdty1_top"])
+  if block:
+    title = ''
+    try:
+      title = parser.string(parser.attr(block, "h3", ["class", "title"]))
+    except: pass
+    try:
+      detail = parser.string(parser.attr(block, "p", ["class", "text-info"]))
+    except: pass
+    uri = ''
+    try:
+      href = parser.string(parser.attribute(parser.tag(block, "a"), "href"))
+      if href:
+        uri = CECILE_HOME+href
+    except: pass
+    try:
+      image_src = parser.string(parser.attribute(parser.tag(block, "img"), "src"))
+      if image_src:
+        image = CECILE_HOME+image_src
+        buyer = '<div class="buyer">'
+        buyer += '<a href="'+uri+'&'+param+'"><img src="'+image+'">'
+        buyer += '<p class="icon"><span>バイヤー厳選</span></p>'
+        if title:
+          buyer += '<p>'+title+'</p>'
+        if detail:
+          buyer += '<p class="sub">'+detail+'</p>'
+        buyer += '</a></div>'
+    except: pass
+    
+  # コーディネート
+  try:
+    items = parser.attr(html, "h2", ["class", "ttl-cmn-02"],1)
+    for item in items:
+      tmp = parser.string(item)
+      if 'コーディネート' in tmp:
+        coordinate = '<div class="title">'+tmp+'</div>'
+        break 
+  except: pass
+  
+  block = parser.attr(html, "div", ["id", "mod-trend-coordinate"])
+  items = parser.attr(block, "div", ["class", "box-trend-content"],1)
+  num = 0
+  tmp = ''
+  for item in items:
+    uri = ''
+    try:
+      href = parser.string(parser.attribute(parser.tag(parser.attr(item, "div", ["class", "trigger"]), "a"), "href"))
+      if href:
+        uri = CECILE_HOME+href
+    except: pass
+    try:
+      image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src"))
+      title = parser.string(parser.attribute(parser.tag(item, "img"), "alt"))
+      if image_src:
+        image = CECILE_HOME+image_src
+        if num == 0:
+          coordinate += '<div class="trend"><a href="'+uri+'?'+param+'"><img src="'+image+'"><p>'+title+'</p></a></div>'
+        else:
+          tmp += '<li><a href="'+uri+'?'+param+'"><img src="'+image+'"><p>'+title+'</p></a>'
+      num += 1
+    except: pass
+    if num > 3: break
+
+  if tmp:
+    coordinate += '''
+      <ul class="grid trend">
+'''
+    coordinate += tmp
+    coordinate += '''
+      </ul>
+      <div class="allview">
+'''
+    coordinate += '<a href="https://www.cecile.co.jp/sc/style/?'+param+'">'
+    coordinate += '''
+          <div>すべてのコーディネートを見る</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+'''
+  
+  # ランキング
+  box = 0
+  ranking = ''
+  active = ' is-active'
+  for genre in rankings:
+    data_rank = web.get('https://www.cecile.co.jp/sc/ranking/'+genre+'/')
+    html_rank = parser.content(data_rank["src"])
+    block = parser.attr(html_rank, "ol", ["class", "ranking-list"])
+    items = parser.attr(block, "li", ["class", "ranking-list-item"],1)
+
+    ranking += '<ul class="grid ranking box-'+str(box)+active+'">'
+    active = ''
+    rank = 1
+    for item in items:
+      price = ''
+      try:
+        price = parser.html_string(parser.attr(item, "p", ["class", "price"]))
+      except: pass
+      uri = ''
+      try:
+        href = parser.string(parser.attribute(parser.tag(item, "a"), "href"))
+        if href:
+          uri = CECILE_HOME+href
+      except: pass
+      try:
+        image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src"))
+        title = parser.string(parser.attribute(parser.tag(item, "img"), "alt"))
+        if image_src:
+          image = CECILE_HOME+image_src
+          ranking += '<li><p class="rank">'+str(rank)+'</p>'
+          ranking += '<a href="'+uri+'?'+param+'"><img src="'+image+'">'
+          ranking += '<p>'+title+'</p><p><span>'+price+'</span></p></a>'
+      except: pass
+      rank += 1
+      if rank > 9: break
+    ranking += '</ul>'
+    ranking += '<div class="allview ranking ranking-'+str(box)+'">'
+    box += 1
+    ranking += '<a href="https://www.cecile.co.jp/sc/ranking/'+genre+'/?'+param+'">'
+    ranking += '''
+          <div>人気ランキングの続きはこちら</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+'''
+  save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, ranking, param)
+
 # HOMEページを保存
-def save_home_page(key_visual_slider, ranking, trend):
+def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, ranking, param):
   html = '''<!doctype html>
 <html lang="ja">
 <head>
@@ -176,14 +394,14 @@ def save_home_page(key_visual_slider, ranking, trend):
           </div>
         </form>
       </div>
-      <div class="settings">
-        <a href="settings"><i class="material-icons submit">settings</i></a>
-      </div>
     </header>
-    <div class="container">'''
-  html += key_visual_slider
+    <div class="container">
+'''
+  html += keyvisual
+  html += feature
+  html += banner
   html += '''
-    <div class="title nb">人気ランキング</div>
+      <div class="title nb">人気ランキング</div>
       <div class="swiper-container js-swiper-category">
         <div class="swiper-wrapper">
           <div class="swiper-slide item-slider"> <span class="btn-category">
@@ -208,237 +426,266 @@ def save_home_page(key_visual_slider, ranking, trend):
       </div>
 '''
   html += ranking
-  html += trend
+  html += buyer
+  html += pickup
+  html += coordinate
+
+  genres = [
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/LD/','レディースファッション'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g3-1-LD-TS-1I/','Tシャツ'],
+        ['https://www.cecile.co.jp/genre/g3-1-LD-TS-BR/','ブラウス'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-TS/','トップス'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-OP/','ワンピース'],
+        ['https://www.cecile.co.jp/genre/g3-1-LD-TS-TN/','チュニック'],
+        ['https://www.cecile.co.jp/genre/g3-1-LD-TS-1G/','ニット・セーター'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-PN/','パンツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-SK/','スカート'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-FR/','スーツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-BA/','バッグ'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-SB/','シューズ'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-FG/','ファッション小物'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-AC/','アクセサリー'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-RN/','レインウェア'],
+        ['https://www.cecile.co.jp/genre/g2-1-LD-SW/','水着'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/IN/','女性下着'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g2-1-IN-BS/','ブラジャー'],
+        ['https://www.cecile.co.jp/genre/g2-1-IN-SU/','ブラ＆ショーツセット'],
+        ['https://www.cecile.co.jp/genre/g2-1-IN-SH/','ショーツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-IN-IN/','肌着・インナー'],
+        ['https://www.cecile.co.jp/genre/g2-1-IN-BD/','補整下着'],
+        ['https://www.cecile.co.jp/genre/g2-1-IN-LN/','ランジェリー'],
+        ['https://www.cecile.co.jp/genre/g2-1-SC-IN/','ジュニア・ティーンズ下着'],
+        ['https://www.cecile.co.jp/genre/g2-1-IN-PJ/','パジャマ・ルームウェア'],
+        ['https://www.cecile.co.jp/genre/g2-1-IN-ST/','ストッキング・タイツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-IN-SC/','靴下・ソックス'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/MN/','メンズファッション'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g3-1-MN-TS-1I/','Tシャツ'],
+        ['https://www.cecile.co.jp/genre/g3-1-MN-TS-1E/','ポロシャツ'],
+        ['https://www.cecile.co.jp/genre/g3-1-MN-CT-JK/','ジャケット'],
+        ['https://www.cecile.co.jp/genre/g2-1-MN-TS/','トップス'],
+        ['https://www.cecile.co.jp/genre/g3-1-MN-TS-1G/','ニット・セーター'],
+        ['https://www.cecile.co.jp/genre/g2-1-MN-FR/','スーツ'],
+        ['https://www.cecile.co.jp/genre/g3-1-MN-TS-YS/','ワイシャツ・カッターシャツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-MN-PN/','パンツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-MN-BA/','バッグ'],
+        ['https://www.cecile.co.jp/genre/g2-1-MN-SB/','シューズ'],
+        ['https://www.cecile.co.jp/genre/g2-1-MN-FG/','ファッション小物'],
+        ['https://www.cecile.co.jp/genre/g2-1-MN-RN/','レインウェア'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/UN/','メンズ下着'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g2-1-UN-IN/','肌着・インナー'],
+        ['https://www.cecile.co.jp/genre/g2-1-UN-SH/','トランクス・ブリーフ'],
+        ['https://www.cecile.co.jp/genre/g2-1-UN-PJ/','パジャマ・ルームウェア'],
+        ['https://www.cecile.co.jp/genre/g2-1-UN-SC/','靴下・ソックス'],
+        ['https://www.cecile.co.jp/genre/g2-1-UN-ST/','タイツ・レギンス'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/UF/','事務服・作業服・白衣'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g2-1-UF-OF/','事務服・OL制服'],
+        ['https://www.cecile.co.jp/genre/g2-1-UF-NS/','ナース服・白衣'],
+        ['https://www.cecile.co.jp/genre/g2-1-UF-WW/','作業着・ワークウェア'],
+        ['https://www.cecile.co.jp/genre/g2-1-UF-FU/','飲食店ユニフォーム'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/SC/','制服・学生服'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g2-1-SC-HS/','高校制服'],
+        ['https://www.cecile.co.jp/genre/g2-1-SC-JH/','中学校制服'],
+        ['https://www.cecile.co.jp/genre/g2-1-SC-PS/','小学校制服'],
+        ['https://www.cecile.co.jp/genre/g2-1-SC-GL/','女子制服'],
+        ['https://www.cecile.co.jp/genre/g2-1-SC-BY/','男子制服'],
+        ['https://www.cecile.co.jp/genre/g2-1-SC-IN/','ジュニア・ティーンズ下着'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/s/big/','大きいサイズ'
+      ],
+      'sub': [
+        ['/feature/lsize/lady/','大きいサイズ レディース服'],
+        ['/feature/lsize/inner/','大きいサイズ レディース下着'],
+        ['/feature/lsize/men/','大きいサイズ メンズ'],
+        ['/feature/lsize/office/','大きいサイズ 事務服・制服'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/FS/','ファッション・下着すべて'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g3-1-FS-TS-1I/','Tシャツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-TS/','トップス'],
+        ['https://www.cecile.co.jp/genre/g3-1-FS-CT-JK/','ジャケット'],
+        ['https://www.cecile.co.jp/genre/g3-1-FS-TS-1G/','ニット・セーター'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-OP/','ワンピース'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-PN/','パンツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-SK/','スカート'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-FR/','スーツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-BS/','ブラジャー'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-SU/','ブラ＆ショーツセット'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-SH/','ショーツ・トランクス'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-IN/','肌着・インナー'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-BD/','補整下着'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-LN/','ランジェリー'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-PJ/','パジャマ・ルームウェア'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-ST/','ストッキング・タイツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-SC/','靴下・ソックス'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-BA/','バッグ'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-SB/','シューズ'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-AC/','アクセサリー'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-FG/','ファッション小物'],
+        ['https://www.cecile.co.jp/genre/g2-1-FS-RN/','レインウェア'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/FN/','家具・収納'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g2-1-FN-KT/','キッチン収納・食器棚'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-CL/','衣類収納'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-CO/','クローゼット・押入れ収納'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-OT/','収納家具・収納 その他'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-EN/','玄関収納・屋外収納'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-CH/','チェスト・キャビネット'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-LC/','ラック'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-BK/','本棚'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-TB/','テーブル・机'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-SF/','ソファー・チェアー'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-TV/','テレビ台'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-KO/','こたつ・こたつ布団'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-KD/','学習机･子供部屋'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-DR/','ドレッサー・ミラー'],
+        ['https://www.cecile.co.jp/genre/g2-1-FN-BU/','仏壇・仏具'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/BD/','寝具・ベッド'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g2-1-BD-CV/','布団カバー・シーツ'],
+        ['https://www.cecile.co.jp/genre/g2-1-BD-CL/','布団・枕'],
+        ['https://www.cecile.co.jp/genre/g2-1-BD-BL/','毛布・タオルケット'],
+        ['https://www.cecile.co.jp/genre/g2-1-BD-BD/','ベッド'],
+        ['https://www.cecile.co.jp/genre/g2-1-BD-MT/','マットレス'],
+        ['https://www.cecile.co.jp/genre/g2-1-BD-BS/','ベッドサイド家具・小物'],
+        ['https://www.cecile.co.jp/genre/g2-1-BD-CF/','安眠・快眠グッズ'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/CT/','カーテン・ラグ・ファブリック'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g2-1-CT-CT/','カーテン'],
+        ['https://www.cecile.co.jp/genre/g2-1-CT-BL/','ブラインド・ロールスクリーン'],
+        ['https://www.cecile.co.jp/genre/g2-1-CT-CP/','カーペット'],
+        ['https://www.cecile.co.jp/genre/g2-1-CT-MT/','ラグ・マット類'],
+        ['https://www.cecile.co.jp/genre/g2-1-CT-CV/','カバー類'],
+        ['https://www.cecile.co.jp/genre/g2-1-CT-TW/','タオル'],
+        ['https://www.cecile.co.jp/genre/g2-1-CT-CS/','クッション・座布団'],
+        ['https://www.cecile.co.jp/genre/g2-1-CT-TL/','トイレタリー'],
+        ['https://www.cecile.co.jp/genre/g2-1-CT-SP/','スリッパ'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/LF/','キッチン・雑貨・日用品'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g3-1-LF-EL-1D/','扇風機'],
+        ['https://www.cecile.co.jp/genre/g2-1-LF-KT/','キッチン用品'],
+        ['https://www.cecile.co.jp/genre/g2-1-LF-LG/','生活雑貨'],
+        ['https://www.cecile.co.jp/genre/g2-1-LF-BT/','バス用品・ランドリー'],
+        ['https://www.cecile.co.jp/genre/g2-1-LF-EL/','家電・AV機器'],
+        ['https://www.cecile.co.jp/genre/g2-1-LF-TL/','トイレ用品'],
+        ['https://www.cecile.co.jp/genre/g2-1-LF-LN/','洗濯用品・掃除道具'],
+        ['https://www.cecile.co.jp/genre/g2-1-LF-IN/','インテリア雑貨・小物'],
+        ['https://www.cecile.co.jp/genre/g2-1-LF-HG/','趣味雑貨'],
+        ['https://www.cecile.co.jp/genre/g2-1-LF-FL/','花・ガーデニング'],
+        ['https://www.cecile.co.jp/genre/g2-1-LF-GF/','ギフト'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/genre/g1/1/BT/','美容・健康・サプリメント'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g2-1-BT-HC/','ヘアケア・ボディケア'],
+        ['https://www.cecile.co.jp/genre/g2-1-BT-PF/','コスメ・ネイル・香水'],
+        ['https://www.cecile.co.jp/genre/g2-1-BT-CS/','スキンケア化粧品'],
+        ['https://www.cecile.co.jp/genre/g2-1-BT-BR/','ブランドで選ぶ'],
+        ['https://www.cecile.co.jp/genre/g2-1-BT-ES/','ホームエステ'],
+        ['https://www.cecile.co.jp/genre/g2-1-BT-HF/','ダイエット・健康食品'],
+        ['https://www.cecile.co.jp/genre/g2-1-BT-SP/','サプリメント'],
+        ['https://www.cecile.co.jp/genre/g2-1-BT-SN/','衛生用品'],
+        ['https://www.cecile.co.jp/genre/g2-1-BT-HG/','健康器具'],
+        ['https://www.cecile.co.jp/genre/g2-1-BT-NC/','シニア・介護用品'],
+      ],
+    },
+    {
+      'main':[
+        'https://www.cecile.co.jp/bargain/','バーゲン'
+      ],
+      'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/LD/bargain/','レディースファッション'],
+        ['https://www.cecile.co.jp/genre/g1/1/IN/bargain/','女性下着'],
+        ['https://www.cecile.co.jp/genre/g1/1/MN/bargain/','メンズファッション'],
+        ['https://www.cecile.co.jp/genre/g1/1/UN/bargain/','メンズ下着'],
+        ['https://www.cecile.co.jp/genre/g1/1/UF/bargain/','事務服・作業服・白衣'],
+        ['https://www.cecile.co.jp/genre/g1/1/SC/bargain/','制服・学生服'],
+        ['https://www.cecile.co.jp/genre/g1/1/FS/bargain/','ファッション・下着すべて'],
+        ['https://www.cecile.co.jp/genre/g1/1/FN/bargain/','家具・収納'],
+        ['https://www.cecile.co.jp/genre/g1/1/BD/bargain/','寝具・ベッド'],
+        ['https://www.cecile.co.jp/genre/g1/1/CT/bargain/','カーテン・ラグ・ファブリック'],
+        ['https://www.cecile.co.jp/genre/g1/1/LF/bargain/','キッチン・雑貨・日用品'],
+        ['https://www.cecile.co.jp/genre/g1/1/BT/bargain/','美容・健康・サプリメント'],
+      ],
+    },
+  ]
+
   html += '''
       <div class="title">カテゴリから探す</div>
       <nav class="mod-side-category">
         <ol id="nav-side-category-sp" class="list-category">
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/LD/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">レディースファッション</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-LD-TS-1I/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">Tシャツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-LD-TS-BR/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ブラウス</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-TS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">トップス</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-OP/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ワンピース</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-LD-TS-TN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">チュニック</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-LD-TS-1G/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ニット・セーター</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-PN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">パンツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-SK/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">スカート</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-FR/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">スーツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-BA/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">バッグ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-SB/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">シューズ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-FG/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ファッション小物</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-AC/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">アクセサリー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-RN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">レインウェア</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LD-SW/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">水着</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/IN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">女性下着</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-BS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ブラジャー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-SU/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ブラ＆ショーツセット</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-SH/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ショーツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-IN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">肌着・インナー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-BD/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">補整下着</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-LN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ランジェリー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-IN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ジュニア・ティーンズ下着</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-PJ/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">パジャマ・ルームウェア</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-ST/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ストッキング・タイツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-IN-SC/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">靴下・ソックス</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/MN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">メンズファッション</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-MN-TS-1I/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">Tシャツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-MN-TS-1E/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ポロシャツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-MN-CT-JK/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ジャケット</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-TS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">トップス</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-MN-TS-1G/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ニット・セーター</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-FR/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">スーツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-MN-TS-YS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ワイシャツ・カッターシャツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-PN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">パンツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-BA/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">バッグ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-SB/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">シューズ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-FG/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ファッション小物</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-MN-RN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">レインウェア</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/UN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">メンズ下着</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UN-IN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">肌着・インナー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UN-SH/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">トランクス・ブリーフ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UN-PJ/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">パジャマ・ルームウェア</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UN-SC/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">靴下・ソックス</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UN-ST/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">タイツ・レギンス</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/UF/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">事務服・作業服・白衣</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UF-OF/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">事務服・OL制服</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UF-NS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ナース服・白衣</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UF-WW/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">作業着・ワークウェア</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-UF-FU/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">飲食店ユニフォーム</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/SC/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">制服・学生服</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-HS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">高校制服</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-JH/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">中学校制服</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-PS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">小学校制服</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-GL/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">女子制服</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-BY/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">男子制服</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-SC-IN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ジュニア・ティーンズ下着</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/s/big/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">大きいサイズ</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="/feature/lsize/lady/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">大きいサイズ レディース服</a></li>
-                <li><a class="link-sub" href="/feature/lsize/inner/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">大きいサイズ レディース下着</a></li>
-                <li><a class="link-sub" href="/feature/lsize/men/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">大きいサイズ メンズ</a></li>
-                <li><a class="link-sub" href="/feature/lsize/office/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">大きいサイズ 事務服・制服</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/FS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">ファッション・下着すべて</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-FS-TS-1I?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">Tシャツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-TS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">トップス</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-FS-CT-JK/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ジャケット</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-FS-TS-1G/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ニット・セーター</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-OP/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ワンピース</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-PN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">パンツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-SK/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">スカート</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-FR/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">スーツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-BS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ブラジャー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-SU/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ブラ＆ショーツセット</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-SH/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ショーツ・トランクス</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-IN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">肌着・インナー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-BD/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">補整下着</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-LN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ランジェリー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-PJ/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">パジャマ・ルームウェア</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-ST/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ストッキング・タイツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-SC/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">靴下・ソックス</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-BA/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">バッグ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-SB/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">シューズ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-AC/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">アクセサリー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-FG/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=appv">ファッション小物</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FS-RN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">レインウェア</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/FN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">家具・収納</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-KT/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">キッチン収納・食器棚</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-CL/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">衣類収納</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-CO/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">クローゼット・押入れ収納</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-OT/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">収納家具・収納 その他</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-EN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">玄関収納・屋外収納</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-CH/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">チェスト・キャビネット</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-LC/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ラック</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-BK/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">本棚</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-TB/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">テーブル・机</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-SF/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ソファー・チェアー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-TV/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">テレビ台</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-KO/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">こたつ・こたつ布団</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-KD/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">学習机･子供部屋</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-DR/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ドレッサー・ミラー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-FN-BU/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">仏壇・仏具</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/BD/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">寝具・ベッド</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-CV/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">布団カバー・シーツ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-CL/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">布団・枕</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-BL/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">毛布・タオルケット</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-BD/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ベッド</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-MT/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">マットレス</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-BS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ベッドサイド家具・小物</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BD-CF/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">安眠・快眠グッズ</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/CT/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">カーテン・ラグ・ファブリック</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-CT/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">カーテン</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-BL/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ブラインド・ロールスクリーン</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-CP/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">カーペット</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-MT/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ラグ・マット類</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-CV/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">カバー類</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-TW/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">タオル</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-CS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">クッション・座布団</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-TL/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">トイレタリー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-CT-SP/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">スリッパ</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/LF/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">キッチン・雑貨・日用品</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g3-1-LF-EL-1D/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">扇風機</a></li>		
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-KT/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">キッチン用品</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-LG/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">生活雑貨</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-BT/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">バス用品・ランドリー</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-EL/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">家電・AV機器</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-TL/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">トイレ用品</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-LN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">洗濯用品・掃除道具</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-IN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">インテリア雑貨・小物</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-HG/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">趣味雑貨</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-FL/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">花・ガーデニング</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-LF-GF/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ギフト</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/genre/g1/1/BT/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">美容・健康・サプリメント</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-HC/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ヘアケア・ボディケア</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-PF/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">コスメ・ネイル・香水</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-CS/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">スキンケア化粧品</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-BR/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ブランドで選ぶ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-ES/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ホームエステ</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-HF/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ダイエット・健康食品</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-SP/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">サプリメント</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-SN/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">衛生用品</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-HG/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">健康器具</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g2-1-BT-NC/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">シニア・介護用品</a></li>
-              </ol>
-            </div>
-          </li>
-          <li><a href="https://www.cecile.co.jp/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app" class="link-main"><span class="text">バーゲン</span></a>
-            <div class="box-nav-sub">
-              <ol class="list-sub-category">
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/LD/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">レディースファッション</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/IN/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">女性下着</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/MN/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">メンズファッション</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/UN/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">メンズ下着</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/UF/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">事務服・作業服・白衣</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/SC/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">制服・学生服</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/FS/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">ファッション・下着すべて</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/FN/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">家具・収納</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/BD/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">寝具・ベッド</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/CT/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">カーテン・ラグ・ファブリック</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/LF/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">キッチン・雑貨・日用品</a></li>
-                <li><a class="link-sub" href="https://www.cecile.co.jp/genre/g1/1/BT/bargain/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">美容・健康・サプリメント</a></li>
-              </ol>
-            </div>
-          </li>
+'''
+  for genre in genres:
+    html += '<li><a href="'+genre['main'][0]+'?'+param+'" class="link-main"><span class="text">'+genre['main'][1]+'</span></a>'
+    html += '<div class="box-nav-sub"><ol class="list-sub-category">'
+    for v in genre['sub']:
+      html += '<li><a class="link-sub" href="'+v[0]+'?'+param+'">'+v[1]+'</a></li>'
+    html += '</ol></div></li>'
+
+  html += '''
         </ol>
       </nav>
 
@@ -459,7 +706,7 @@ def save_home_page(key_visual_slider, ranking, trend):
       </div>
       <ul class="grid footer">
         <li>
-          <a href="https://www.cecile.co.jp/card/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">
+          <a href="https://www.cecile.co.jp/present/game/?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">
             <img src="/static/images/present2.png">
           </a>
         <li>

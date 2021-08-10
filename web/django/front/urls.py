@@ -3,6 +3,7 @@ from . import views
  
 app_name = 'front'
 urlpatterns = [
+    path('viewer/<int:pk>/', views.degitalcatalog, name='degitalcatalog'),
     path('viewer', views.viewer, name="viewer"),
     path('design', views.design, name="design"),
     path('home', views.home, name="home"),

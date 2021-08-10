@@ -11,16 +11,63 @@
 </head>
 <body>
   <div id="contents">
-    <header>
-      <h3>設定</h3>
+    <header class="sub">
+      <div class="settings">
+        <a href="exit"><i class="material-icons submit">cancel</i></a>
+      </div>
+      <img src="/static/images/logo.gif">
     </header>
+    <div class="title catalog">ご利用情報</div>
+    <ol class="settings">
+      <li>
+        <a href="https://www.cecile.co.jp/fst/guide/">
+          <div class="icon"><i class="material-icons submit">auto_stories</i></div>
+          <div>
+            <p class="title">ご利用ガイド</p>
+            <p><span>セシールオンラインショップのご利用ガイドが閲覧いただけます</span></p>
+          </div>
+        </a>
+      <li>
+        <a href="https://faq.cecile.co.jp/?site_domain=default">
+          <div class="icon"><i class="material-icons submit">how_to_vote</i></div>
+          <div>
+            <p class="title">お問い合わせ</p>
+            <p><span>よくある質問とお問い合わせ</span></p>
+          </div>
+        </a>
+      <li>
+        <a href="https://www.cecile.co.jp/fst/guide/terms/">
+          <div class="icon"><i class="material-icons submit">import_contacts</i></div>
+          <div>
+            <p class="title">セシールご利用規約</p>
+            <p><span>お客様がセシールにおける通信販売をご利用される場合は、本規約の内容に同意の上、ご利用ください。</span></p>
+          </div>
+        </a>
+      <li>
+        <a href="https://www.cecile.co.jp/fst/guide/privacy/">
+          <div class="icon"><i class="material-icons submit">policy</i></div>
+          <div>
+            <p class="title">プライバシーポリシー</p>
+            <p><span>当社の個人情報保護についての取組みを、記載いたしております</span></p>
+          </div>
+        </a>
+      <li>
+        <a href="https://www.cecile.co.jp/fst/guide/rule/">
+          <div class="icon"><i class="material-icons submit">description</i></div>
+          <div>
+            <p class="title">特定商取引法に基づく表示</p>
+            <p><span>当サイトでの通信販売に対する、特定商取引法に基づくご案内を行っております</span></p>
+          </div>
+        </a>
+    </ol>
+    <div class="title catalog">設定</div>
     <ol class="settings">
       <li>
         <a href="push_settings">
           <div class="icon"><i class="material-icons submit">task_alt</i></div>
           <div>
             <p class="title">プッシュ通知の設定</p>
-            <p><span>クーポンやセールなど、お得な情報をお知らせする通知の受信設定が行えます</span></p>
+            <p><span>キャンペーンやセールなど、お得な情報をお知らせする通知の受信設定を行えます</span></p>
           </div>
         </a>
       <li>
@@ -28,7 +75,7 @@
           <div class="icon"><i class="material-icons submit">delete_forever</i></div>
           <div>
             <p class="title">データ削除</p>
-            <p><span>カタログ画像検索の履歴、デジタルカタログの付箋リスト等、アプリで保持している情報を削除します</span></p>
+            <p><span>カタログ画像検索の履歴、デジタルカタログの付箋リストなど、アプリで保持しているデータを削除します</span></p>
           </div>
         </a>
       <li>
@@ -36,7 +83,15 @@
           <div class="icon"><i class="material-icons submit">disabled_visible</i></div>
           <div>
             <p class="title">キャッシュの削除</p>
-            <p><span>HOME、デジタルカタログ、カタログ画像検索画面等のキャッシュを削除します</span></p>
+            <p><span>ホーム、デジタルカタログ、新着情報などのアプリ画面のキャッシュを削除します</span></p>
+          </div>
+        </a>
+      <li>
+        <a href="firebase">
+          <div class="icon"><i class="material-icons submit">circle_notifications</i></div>
+          <div>
+            <p class="title">プッシュ通知</p>
+            <p><span>プッシュ通知のテストを行う端末トークンを表示します</span></p>
           </div>
         </a>
       <li class="nolink">
@@ -44,7 +99,7 @@
           <div class="icon"><i class="material-icons submit">build</i></div>
           <div>
             <p class="title">アプリバージョン</p>
-            <p><span>1.5.0</span></p>
+            <p><span>2.0.0</span></p>
           </div>
         </nav>
     </ol>

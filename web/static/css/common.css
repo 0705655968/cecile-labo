@@ -30,8 +30,14 @@ ul,ol{
 header{
   margin: 0px;
   padding: 0px;
-  height: 80px;
+  height: 120px;
   text-align: center;
+}
+header.sub{
+  height: 50px;
+}
+header.news{
+  height: 130px;
 }
   header img{
     position: absolute;
@@ -49,13 +55,20 @@ header{
     font-size: 18px;
     font-weight: normal;
     letter-spacing: 1px;
+    padding-top: 20px;
+  }
+  header.sub h3{
+    padding-top: 40px;
+  }
+  header.news h3{
+    padding-top: 40px;
   }
   header div.settings{
     position: absolute;
     width: 32px;
     height: 32px;
-    top: 15px;
-    right: 5px;
+    top: 13px;
+    right: 10px;
   }
     header div.settings i{
       position: absolute;
@@ -69,7 +82,7 @@ header{
     height: 36px;
     border: solid 1px #dddddd;
     border-radius: 3px;
-    margin-top: 20px;
+    margin-top: 60px;
     margin-left: 10px;
   }
 
@@ -218,6 +231,51 @@ div.history {
   width: 100%;
 }
 
+/* popup
+---------------------------------------------------------- */
+div.dammy {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  z-index: 9;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+}
+div.popup {
+  position: absolute;
+  box-sizing: border-box;
+  width: 90%;
+  top: 40px;
+  left: 5%;
+  text-align: center;
+  background-color: #fff;
+  z-index: 10;
+  padding: 15px 0px;
+  border-radius: 10px;
+  display: none;
+}
+  div.popup img{
+    width: 90%;
+    height: auto;
+    margin-left: 5%;
+    padding: 0px;
+    margin: 0px;
+  }
+  div.popup p{
+    text-align: left;
+    box-sizing: 100%;
+    padding: 5px 10px;
+  }
+  div.popup div.closebtn{
+    background-color: #555;
+    color: #fff;
+    border-radius: 5px;
+    padding: 3px 15px;
+    margin: 0px;
+    display: inline-block;
+  }
 
 /* loading
 ---------------------------------------------------------- */
@@ -584,6 +642,7 @@ ul{
 }
 div.search_history ul {
   grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+  grid-auto-rows: 180px;
 }
 ul.footer{
   grid-auto-rows: 160px;
@@ -597,7 +656,7 @@ ul.grid.ranking{
 }
 ul.grid.catalog{
   grid-template-columns: repeat(auto-fill, minmax(120px,1fr));
-  grid-auto-rows: 220px;
+  grid-auto-rows: auto;
   grid-gap: 5px;
 }
   ul.grid.catalog p{
@@ -643,6 +702,8 @@ ul.grid.trend{
     }
     div.search_history ul li img {
       border-radius: 10px;
+      height: 180px;
+      background-size: cover;
     }
     ul li img.hosei{
       border-radius: 10px;
@@ -1313,6 +1374,7 @@ div.lenz div.photo{
 
 div.lenz{
   margin-bottom: 0px;
+  margin-top: 75px;
 }
 
 div.lenz div.loader{

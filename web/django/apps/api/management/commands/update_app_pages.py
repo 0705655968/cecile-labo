@@ -31,4 +31,7 @@ class Command(BaseCommand):
             exit()
 
         # 新着情報ページの作成
-        updates_news_page()
+#        updates_news_page()
+
+        # ホーム画面の作成
+        updates_home_page()

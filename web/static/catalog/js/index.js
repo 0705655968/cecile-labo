@@ -181,14 +181,19 @@ $(function(){
       return decodeURIComponent(results[2].replace(/\+/g, " "));
   }
 
+  function getCatalogCode(){
+      return window.location.href.split('/')[4];
+  }
+
 	/*-------------------------------------------------------------------------
 	  xml読み込み
 	-------------------------------------------------------------------------*/
 
 	$('#Loading').show();
+
 	$.ajax({
 		type : 'GET',
-		url : '/static/catalog/contents/'+getUrlParam('code')+'.xml',
+		url : '/static/catalog/contents/'+getCatalogCode()+'.xml',
 		dataType : 'xml'
 	}).done(function(data){
 		xml_contents = data;
@@ -2500,7 +2505,7 @@ $(function(){
 	-------------------------------------------------------------------------*/
 	//ホームボタン
 	$('#HomeBtn,#CatalogBtn').on('click', function(){
-		location.href = 'catalog';
+		location.href = '/catalog';
 	});
 
 	//ズーム
@@ -2619,7 +2624,7 @@ $(function(){
 
 	// 共有
 	$('#PageShareBtn').on('click', function(){
-		var url = 'https://cecile-dev.prm.bz/share/fst/digicata/'+getUrlParam('code')+'/?directPage=' + (curPage+nombre);
+		var url = 'https://cecile-dev.prm.bz/share/fst/digicata/'+getCatalogCode()+'/?directPage=' + (curPage+nombre);
 		location.href=url;
 	});
 
