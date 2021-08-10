@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "840036602847",
+    "project_id": "cecile-dev",
+    "storage_bucket": "cecile-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840036602847:android:c4a2e4c16a201684bdaa6a",
+        "android_client_info": {
+          "package_name": "com.example.cecile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "840036602847-io6a398d554s7oqihfo7c46ngt8eomid.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDX1oLtgmVJjqegp_v85QSk4JJwq3S7ApY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "840036602847-io6a398d554s7oqihfo7c46ngt8eomid.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

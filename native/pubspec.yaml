@@ -36,6 +36,10 @@ dependencies:
   intl: ^0.17.0
   share: ^2.0.4
 #  flutter_inappwebview: ^5.3.2
+  firebase_messaging:
+  flutter_local_notifications:
+  firebase_core: ^1.4.0
+  fcm_config: ^3.0.8
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -79,6 +83,7 @@ flutter:
   assets:
     - assets/html/wait.html
     - assets/html/error.html
+    - assets/html/history.html
 
   # To add assets to your application, add an assets section, like this:
   # assets:

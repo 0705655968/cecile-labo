@@ -11,8 +11,53 @@ import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fcm_config/fcm_config.dart';
 
-void main() {
+// バックグラウンドの処理の実態
+String newsId = '';
+
+// WebViewコントローラー
+late WebViewController _webViewController;
+final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+
+// トップレベルに定義
+Future<void> _firebaseMessagingBackgroundHandler(
+    RemoteMessage _notification) async {
+  print("バックグラウンドでメッセージを受け取りました");
+  var title = _notification.notification!.title;
+  var body = _notification.notification!.body;
+  print(title);
+  print(body);
+  try {
+    newsId = _notification.data['news'];
+    print(newsId);
+  } catch(err){
+    print(err);
+  }
+  FCMConfig.instance.displayNotification(title: title ?? '', body: body ?? '');
+}
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'High Importance Notifications', // title
+  'This channel is used for important notifications.', // description
+  importance: Importance.high,
+);
+
+//void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  //バックグラウンド用
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   runApp(CecileApp());
 }
 
@@ -32,12 +77,13 @@ class WebViewScreen extends StatefulWidget {
 }
 
 class _WebViewScreenState extends State<WebViewScreen> {
-  late WebViewController _webViewController;
   final bool _debug = true;
   bool _isLoading = false;
   bool _isActive = false;
+  bool _isBar = true;
   int _saveImageMax = 10;
   int _selectedIndex = 0;
+
   List<String> _urlList = [
     'https://cecile-dev.prm.bz/home',
     'https://cecile-dev.prm.bz/catalog',
@@ -47,24 +93,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
   ];
   final initialUrl = 'https://cecile-dev.prm.bz/home';
   final List<String> browserLinkList = [
-    'www.cecile.co.jp'
+    'www.cecile.co.jp','faq.cecile.co.jp'
   ];
   final _selectedItemColor = Colors.white;
   final _unselectedItemColor = Color.fromRGBO(99, 99, 99, 1.0);
-  final _selectedBgColor = Color.fromRGBO(173, 32, 32, 1.0);
+  final _selectedBgColor = Color.fromRGBO(156, 20, 74, 1.0);
   final _unselectedBgColor = Colors.white;
-
-  // 検索履歴画面(ヘッダー)
-  final _historyPageHeader = '''
-    <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="https://cecile-dev.prm.bz/static/css/common.css"></head>
-    <body><div id="contents"><header><h3>カタログ画像検索</h3></header>
-    <div class="search_history"><div class="title"><i class="material-icons submit">history</i>検索履歴</div>''';
-  // 検索履歴画面(フッター)
-  final _historyPageFooter = '''
-    <br style="clear:both;"/><div class="title"><i class="material-icons submit">search</i>検索</div></div><div class="camera"><div class="select_photo"><div>
-    <div class="camera"><a href="https://cecile-dev.prm.bz/gallery"><i class="material-icons">add_a_photo</i><br />写真を撮る</a></div></div></div>
-    <div class="detail_re"><p>検索を行われる場合、上のカメラアイコンを選択し、検索する写真を撮影してください。</p></div></div></div></body></html>''';
 
   @override
   void initState() {
@@ -72,6 +106,42 @@ class _WebViewScreenState extends State<WebViewScreen> {
     if (Platform.isAndroid) {
       WebView.platform = SurfaceAndroidWebView();
     }
+    // 次の処理が無いと、フォアグラウンドでメッセージを受け取れないみたい
+    _firebaseMessaging.getToken().then((token) {
+      print("$token");
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      print("フォアグラウンドオープンアプリでメッセージを受け取りました");
+      _selectedIndex = 0;
+      _isActive = true;
+      _onItemTapped(_selectedIndex);
+      _isActive = false;
+      try {
+        newsId = message.data['news'];
+        _selectedIndex = 0;
+        _webViewController.loadUrl(
+            'https://cecile-dev.prm.bz/home?nid=' + newsId);
+        print(newsId);
+      } catch (err) {
+        print(err);
+      }
+    });
+    FirebaseMessaging.onMessage.listen((message) {
+      print("フォアグラウンドでメッセージを受け取りました");
+      _selectedIndex = 0;
+      _isActive = true;
+      _onItemTapped(_selectedIndex);
+      _isActive = false;
+      // ニュースIDがあれば取得
+      try {
+        newsId = message.data['news'];
+        _webViewController.loadUrl(
+            'https://cecile-dev.prm.bz/home?nid=' + newsId);
+        if(_debug) print(newsId);
+      } catch (err) {
+        print(err);
+      }
+    });
   }
 
   // BottomNavigation 切り替えで動作
@@ -79,6 +149,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
     setState(() {
       _selectedIndex = index;
       _webViewController.loadUrl(_urlList[index]);
+    });
+  }
+
+  Future<void> _onRequestPermissions() async {
+    _firebaseMessaging.getToken().then((token) async {
+      // 取得したトークンを共有する
+      await Share.share("$token");
     });
   }
 
@@ -164,16 +241,15 @@ class _WebViewScreenState extends State<WebViewScreen> {
         String fileName = file.path
             .split('/')
             .last;
-        histories += '<li><a href="https://cecile-dev.prm.bz/history_find/' + fileName + '"><img src="data:image/jpeg;base64,' + img64 + '"></a>';
+        histories += '<li><a href="https://cecile-dev.prm.bz/history_find/' + fileName + '"><img src="https://cecile-dev.prm.bz/static/images/s.gif" style="background:url(data:image/jpeg;base64,' + img64 + ');background-size:cover;"></a>';
       }
     }
     // HTMLの生成
-    var historyPage = _historyPageHeader;
+    var historyPage = await rootBundle.loadString('assets/html/history.html');
     if (histories != '')
-      historyPage += '<ul class="search_history">' + histories + '</ul>';
+      historyPage = historyPage.replaceAll('<template>', '<ul class="search_history">' + histories + '</ul>');
     else
-      historyPage += '<div class="nodata">過去に撮影した写真はありません。</div>';
-    historyPage += _historyPageFooter;
+      historyPage = historyPage.replaceAll('<template>', '<div class="nodata">過去に撮影した写真はありません。</div>');
     return Future<String>.value(historyPage);
   }
 
@@ -230,12 +306,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
       body: Stack(
         children: <Widget>[
           WebView(
-            initialUrl: initialUrl,
+            initialUrl: initialUrl +'?nid='+newsId,
             // jsを有効化
             javascriptMode: JavascriptMode.unrestricted,
             // controllerを登録
             onWebViewCreated: (WebViewController webViewController) {
               _webViewController = webViewController;
+              print('created');
             },
             // リソースの読み込みエラー
             onWebResourceError: (error) async {
@@ -378,6 +455,15 @@ class _WebViewScreenState extends State<WebViewScreen> {
                   )
                 );
                 return NavigationDecision.prevent;
+
+              }
+              else if(uri.path == "/firebase") {
+                // プッシュ通知端末登録
+
+                // プッシュ通知のトークンを取得する
+                _onRequestPermissions();
+
+                return NavigationDecision.prevent;
               }
               else if(uri.path == "/cache_reset") {
                 // WebViewのキャッシュを削除(Androidのみ)
@@ -425,12 +511,20 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 // 何もしない
                 return NavigationDecision.prevent;
               }
-              // WebView内で遷移
-              if(uri.path == "/settings"){
-                if(_debug) print("init");
-                print(_selectedIndex);
+              else if (uri.path == "/exit") {
+                _isBar = true;
                 _isActive = true;
                 _onItemTapped(_selectedIndex);
+                _isActive = false;
+                // 何もしない
+                return NavigationDecision.prevent;
+              }
+              // WebView内で遷移
+              if(uri.path == "/settings"){
+                _isBar = false;
+                _isActive = true;
+                _onItemTapped(_selectedIndex);
+                _webViewController.loadUrl(_urlList[4]);
                 _isActive = false;
               }
               return NavigationDecision.navigate;
@@ -443,36 +537,38 @@ class _WebViewScreenState extends State<WebViewScreen> {
       ),
       bottomNavigationBar: Container(
         margin: EdgeInsets.only(top: 0, bottom: 0),
-        child: BottomNavigationBar(
+        child: _isBar
+            ?BottomNavigationBar(
           // selectedFontSizeの値を0にする事でスペースが消える
           selectedFontSize: 0,
           items: [
             BottomNavigationBarItem(
-              icon: _buildIcon(Icons.home, 'ホーム', 10, 0),
+              icon: _buildIcon(Icons.home, 'ホーム', 12, 0),
               title: SizedBox.shrink(),
             ),
             BottomNavigationBarItem(
-              icon: _buildIcon(Icons.menu_book, 'デジタルカタログ', 9, 1),
+              icon: _buildIcon(Icons.menu_book, 'デジタルカタログ', 12, 1),
               title: SizedBox.shrink(),
             ),
             BottomNavigationBarItem(
-              icon: _buildIcon(Icons.camera_enhance, 'カタログ画像検索', 9, 2),
+              icon: _buildIcon(Icons.camera_enhance, 'カタログ画像検索', 12, 2),
               title: SizedBox.shrink(),
             ),
             BottomNavigationBarItem(
-              icon: _buildIcon(Icons.verified, '新着情報', 10, 3),
-              title: SizedBox.shrink(),
-            ),
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.settings, '設定', 10, 4),
+              icon: _buildIcon(Icons.verified, '新着情報', 12, 3),
               title: SizedBox.shrink(),
             ),
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: _selectedItemColor,
           type: BottomNavigationBarType.fixed,
+        ):Container(
+          color: Colors.white,
+          width: MediaQuery.of(context).size.width,
+          height: 0,
         ),
-      ),
+      )
     );
   }
+
 }
