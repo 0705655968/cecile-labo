@@ -17,7 +17,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fcm_config/fcm_config.dart';
 
 // バックグラウンドの処理の実態
-String newsId = '';
+var newsId = '';
 
 // WebViewコントローラー
 late WebViewController _webViewController;
@@ -26,6 +26,7 @@ final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 // トップレベルに定義
 Future<void> _firebaseMessagingBackgroundHandler(
     RemoteMessage _notification) async {
+  await Firebase.initializeApp();
   print("バックグラウンドでメッセージを受け取りました");
   var title = _notification.notification!.title;
   var body = _notification.notification!.body;
@@ -33,7 +34,10 @@ Future<void> _firebaseMessagingBackgroundHandler(
   print(body);
   try {
     newsId = _notification.data['news'];
+    final logDirectory = await getApplicationDocumentsDirectory();
+    await File('${logDirectory.path}/push.log').writeAsString(newsId);
     print(newsId);
+
   } catch(err){
     print(err);
   }
@@ -54,7 +58,6 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
   //バックグラウンド用
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -76,13 +79,16 @@ class WebViewScreen extends StatefulWidget {
   _WebViewScreenState createState() => _WebViewScreenState();
 }
 
-class _WebViewScreenState extends State<WebViewScreen> {
+class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserver {
   final bool _debug = true;
+  int _selectedIndex = 0;
   bool _isLoading = false;
   bool _isActive = false;
   bool _isBar = true;
   int _saveImageMax = 10;
-  int _selectedIndex = 0;
+
+  late Timer _timer;
+  int _timerCnt = 0;
 
   List<String> _urlList = [
     'https://cecile-dev.prm.bz/home',
@@ -106,10 +112,39 @@ class _WebViewScreenState extends State<WebViewScreen> {
     if (Platform.isAndroid) {
       WebView.platform = SurfaceAndroidWebView();
     }
+    _timer = Timer.periodic(
+      Duration(seconds: 5), // 1秒毎に定期実行
+      (Timer timer) {
+        setState(() async { // 変更を画面に反映するため、setState()している
+          final logDirectory = await getApplicationDocumentsDirectory();
+          newsId = await File('${logDirectory.path}/push.log').readAsString();
+          if(newsId != '') {
+            try {
+              _selectedIndex = 0;
+              _webViewController.loadUrl('https://cecile-dev.prm.bz/home?nid=' + newsId);
+              print(newsId);
+              final dir = Directory('${logDirectory.path}/push.log');
+              dir.deleteSync(recursive: true);
+              timer.cancel();
+            } catch (err) {
+              print(err);
+            }
+          }
+          else{
+//            print(++_timerCnt);
+            if(++_timerCnt > 3) timer.cancel();
+          }
+        });
+      },
+    );
+
     // 次の処理が無いと、フォアグラウンドでメッセージを受け取れないみたい
     _firebaseMessaging.getToken().then((token) {
       print("$token");
     });
+    if (Platform.isIOS) {
+      FirebaseMessaging.instance.requestPermission();
+    }
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       print("フォアグラウンドオープンアプリでメッセージを受け取りました");
       _selectedIndex = 0;
@@ -119,9 +154,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
       try {
         newsId = message.data['news'];
         _selectedIndex = 0;
-        _webViewController.loadUrl(
-            'https://cecile-dev.prm.bz/home?nid=' + newsId);
+        _webViewController.loadUrl('https://cecile-dev.prm.bz/home?nid=' + newsId);
         print(newsId);
+        _timer.cancel();
       } catch (err) {
         print(err);
       }
@@ -135,8 +170,8 @@ class _WebViewScreenState extends State<WebViewScreen> {
       // ニュースIDがあれば取得
       try {
         newsId = message.data['news'];
-        _webViewController.loadUrl(
-            'https://cecile-dev.prm.bz/home?nid=' + newsId);
+        _webViewController.loadUrl('https://cecile-dev.prm.bz/home?nid=' + newsId);
+        _timer.cancel();
         if(_debug) print(newsId);
       } catch (err) {
         print(err);
@@ -339,7 +374,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 // 共有処理
 
                 // URLを正規の形に変更する
-                String shareUrl = uri.toString().replaceAll('cecile-dev.prm.bz/share', 'cecile.co.jp');
+                String shareUrl = uri.toString().replaceAll('cecile-dev.prm.bz/share', 'www.cecile.co.jp');
                 await Share.share(shareUrl);
 
                 return NavigationDecision.prevent;
@@ -434,6 +469,8 @@ class _WebViewScreenState extends State<WebViewScreen> {
                           Navigator.of(context).pop(1);
                           // WebViewのCookieを削除
                           await CookieManager().clearCookies();
+                          // キャッシュデータの削除
+                          await _webViewController.clearCache();
                           // 画像検索履歴データの削除
                           final userDirectory = await getApplicationDocumentsDirectory();
                           List<FileSystemEntity> files = userDirectory.listSync(recursive: true,followLinks: false);
