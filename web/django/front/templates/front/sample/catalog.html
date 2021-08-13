@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>カタログ画像検索</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="Cecile Inc">
+  <link rel="icon" href="https://cecile-dev.prm.bz/static/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cecile-dev.prm.bz/static/css/common.css?v=0001">
+  <script src="https://cecile-dev.prm.bz/static/js/common.js"></script>
+</head>
+<body>
+  <div id="contents">
+    <header class="sub">
+      <div class="settings">
+        <a href="https://cecile-dev.prm.bz/settings"><i class="material-icons submit">settings</i></a>
+      </div>
+      <img src="https://cecile-dev.prm.bz/static/images/logo.gif">
+      <h3>カタログ画像検索</h3>
+    </header>
+
+    <div class="lenz">
+      <div class="title-s">撮影した写真</div>
+      <div class="photo"><img src="https://cecile-dev.prm.bz/static/images/s.gif" style="background-image:url(https://cecile-dev.prm.bz{{ filename_save }})"></div>
+
+      {{ catalog_data | safe }}
+
+      <br style="clear:both;"/>
+      <div class="title"><i class="material-icons submit">search</i>再検索</div>
+    </div>
+    <div class="camera">
+      <div class="select_photo">
+        <div>
+          <div class="camera"><a href="https://cecile-dev.prm.bz/gallery"><i class="material-icons">add_a_photo</i><br />写真を撮る</a></div>
+        </div>
+      </div>
+
+      <div class="detail_re">
+        <p>再検索する場合は、上の「写真を撮る」から、再度お探しの商品が掲載されている誌面を撮影（機種によっては撮影後に保存）してください。</p>
+      </div>
+      <div class="history_menu">
+        <a href="https://cecile-dev.prm.bz/history"><i class="material-icons">camera</i>過去に撮影した写真をみる</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -26,17 +26,22 @@ def updates_news_page():
   xml = parser.xml(xml_org)
   news = ''
   tmp = ''
+  nowdate = int(date.now_datefmt('%Y%m%d%H%M%S'))
   for data in xml['sdAppHome']['whatsnew']['topic']:
     link = str(data['link']).replace('http:', 'https:')
     img = str(data['img']).replace('http:', 'https:')
     title = data['title']
+    open_date = int(date.str2dayfmt(data['startdate'], '%Y%m%d%H%M%S'))
+    close_date = int(date.str2dayfmt(data['enddate'], '%Y%m%d%H%M%S'))
     news_date = data['startdate'][0:10]
-    tmp += '<li><a href="'+link+'?L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">'
-    tmp += '<img src="'+img+'"><div><p>'+title+'</p>'
-    tmp += '<p><span>'+news_date+'</span></p>'
-    tmp += '</div></a>'
-  if tmp:
-    news = '<ul class="news">'+tmp+'</ul>'
+    if nowdate > open_date and close_date > nowdate:
+      setsuzoku = '&' if '?' in link else '?'
+      tmp += '<li><a href="'+link+setsuzoku+'L=cecileapp&utm_source=cecile_dinos_apps&utm_medium=app">'
+      tmp += '<img src="'+img+'"><div><p>'+title+'</p>'
+      tmp += '<p><span>'+news_date+'</span></p>'
+      tmp += '</div></a>'
+    if tmp:
+      news = '<ul class="news">'+tmp+'</ul>'
   
   # 作成したデータを保存
   save_news_page(news=news)
@@ -52,12 +57,16 @@ def save_news_page(news):
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="author" content="Cecile Inc">
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="/static/css/common.css?v=0001">
+  <link rel="stylesheet" href="/static/css/common.css?v=0002">
   <script src="/static/js/common.js"></script>
 </head>
 <body>
   <div id="contents">
     <header>
+      <div class="settings">
+        <a href="settings"><i class="material-icons submit">settings</i></a>
+      </div>
+      <img src="/static/images/logo.gif">
       <h3>新着情報</h3>
     </header>'''
   html += news
@@ -103,7 +112,8 @@ def updates_home_page():
       image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src"))
       if image_src:
         image = CECILE_HOME+image_src
-        tmp += '<div class="swiper-slide"><a href="'+uri+'?'+param+'"><img src="'+image+'" alt=""></a></div>'
+        setsuzoku = '&' if '?' in uri else '?'
+        tmp += '<div class="swiper-slide"><a href="'+uri + setsuzoku + param+'"><img src="'+image+'" alt=""></a></div>'
     except: pass
 
   if tmp:
@@ -133,7 +143,8 @@ def updates_home_page():
       image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src"))
       if image_src:
         image = CECILE_HOME+image_src
-        tmp += '<li><a href="'+uri+'?'+param+'"><figure class="feature-image"><img src="'+image+'" width="383" height="383" decoding="async"></figure></a></li>'
+        setsuzoku = '&' if '?' in uri else '?'
+        tmp += '<li><a href="'+uri+setsuzoku+param+'"><figure class="feature-image"><img src="'+image+'" width="383" height="383" decoding="async"></figure></a></li>'
     except: pass
 
   if tmp:
@@ -166,7 +177,8 @@ def updates_home_page():
       image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src")).replace('383_383','1200_480')
       if image_src:
         image = CECILE_HOME+image_src
-        banner = '<div class="top_banner"><a href="'+uri+'?'+param+'"><img src="'+image+'"></a></div>'
+        setsuzoku = '&' if '?' in uri else '?'
+        banner = '<div class="top_banner"><a href="'+uri+setsuzoku+param+'"><img src="'+image+'"></a></div>'
     except: pass
   
   # ピックアップ情報
@@ -196,7 +208,8 @@ def updates_home_page():
     except: pass
 
     if uri:
-      tmp += '<li><a href="'+uri+'?'+param+'">'
+      setsuzoku = '&' if '?' in uri else '?'
+      tmp += '<li><a href="'+uri+setsuzoku+param+'">'
       if image:
         tmp += '<img src="'+image+'">'
       tmp += '<p>'+title+'</p>'
@@ -241,7 +254,8 @@ def updates_home_page():
       if image_src:
         image = CECILE_HOME+image_src
         buyer = '<div class="buyer">'
-        buyer += '<a href="'+uri+'&'+param+'"><img src="'+image+'">'
+        setsuzoku = '&' if '?' in uri else '?'
+        buyer += '<a href="'+uri+setsuzoku+param+'"><img src="'+image+'">'
         buyer += '<p class="icon"><span>バイヤー厳選</span></p>'
         if title:
           buyer += '<p>'+title+'</p>'
@@ -277,9 +291,11 @@ def updates_home_page():
       if image_src:
         image = CECILE_HOME+image_src
         if num == 0:
-          coordinate += '<div class="trend"><a href="'+uri+'?'+param+'"><img src="'+image+'"><p>'+title+'</p></a></div>'
+          setsuzoku = '&' if '?' in uri else '?'
+          coordinate += '<div class="trend"><a href="'+uri+setsuzoku+param+'"><img src="'+image+'"><p>'+title+'</p></a></div>'
         else:
-          tmp += '<li><a href="'+uri+'?'+param+'"><img src="'+image+'"><p>'+title+'</p></a>'
+          setsuzoku = '&' if '?' in uri else '?'
+          tmp += '<li><a href="'+uri+setsuzoku+param+'"><img src="'+image+'"><p>'+title+'</p></a>'
       num += 1
     except: pass
     if num > 3: break
@@ -305,6 +321,49 @@ def updates_home_page():
   box = 0
   ranking = ''
   active = ' is-active'
+
+  block = parser.attr(html, "div", ["class", "js-box-ranking-content"])
+  ranking_blocks = parser.attr(block, "div", ["class", "box-ranking-content-in"],1)
+  for ranking_block in ranking_blocks:
+    items = parser.attr(ranking_block, "div", ["class", "item-slider"],1)
+    ranking += '<ul class="grid ranking box-'+str(box)+active+'">'
+    active = ''
+    rank = 1
+    genre = rankings[box]
+    for item in items:
+      price = ''
+      try:
+        price = parser.html_string(parser.attr(item, "p", ["class", "text-price"]))
+      except: pass
+      uri = ''
+      try:
+        href = parser.string(parser.attribute(parser.tag(item, "a"), "href"))
+        if href:
+          uri = CECILE_HOME+href
+      except: pass
+      try:
+        image_src = parser.string(parser.attribute(parser.tag(item, "img"), "src"))
+        title = parser.string(parser.attribute(parser.tag(item, "img"), "alt"))
+        if image_src:
+          image = CECILE_HOME+image_src
+          ranking += '<li><p class="rank">'+str(rank)+'</p>'
+          setsuzoku = '&' if '?' in uri else '?'
+          ranking += '<a href="'+uri+setsuzoku+param+'"><img src="'+image+'">'
+          ranking += '<p>'+title+'</p><p><span>'+price+'</span></p></a>'
+      except: pass
+      rank += 1
+      if rank > 6: break
+    ranking += '</ul>'
+    ranking += '<div class="allview ranking ranking-'+str(box)+'">'
+    box += 1
+    ranking += '<a href="https://www.cecile.co.jp/sc/ranking/'+genre+'/?'+param+'">'
+    ranking += '''
+          <div>人気ランキングの続きはこちら</div>
+          <div class="icon"><i class="material-icons">chevron_right</i></div>
+        </a>
+      </div>
+'''
+  """
   for genre in rankings:
     data_rank = web.get('https://www.cecile.co.jp/sc/ranking/'+genre+'/')
     html_rank = parser.content(data_rank["src"])
@@ -331,11 +390,12 @@ def updates_home_page():
         if image_src:
           image = CECILE_HOME+image_src
           ranking += '<li><p class="rank">'+str(rank)+'</p>'
-          ranking += '<a href="'+uri+'?'+param+'"><img src="'+image+'">'
+          setsuzoku = '&' if '?' in uri else '?'
+          ranking += '<a href="'+uri+setsuzoku+param+'"><img src="'+image+'">'
           ranking += '<p>'+title+'</p><p><span>'+price+'</span></p></a>'
       except: pass
       rank += 1
-      if rank > 9: break
+      if rank > 6: break
     ranking += '</ul>'
     ranking += '<div class="allview ranking ranking-'+str(box)+'">'
     box += 1
@@ -345,7 +405,7 @@ def updates_home_page():
           <div class="icon"><i class="material-icons">chevron_right</i></div>
         </a>
       </div>
-'''
+  """
   save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, ranking, param)
 
 # HOMEページを保存
@@ -358,41 +418,49 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="author" content="Cecile Inc">
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="/static/css/common.css?v=0001">
-  <script src="/static/js/common.js"></script>
+  <link rel="stylesheet" href="/static/css/common.css?v=0003">
+  <script src="/static/js/common.js?v=0001"></script>
 </head>
 <body>
+  <div class="dammy"></div>
   <div id="contents">
+    <div class="popup"></div>
     <header>
-      <div class="searcharea">
-        <form method="get" id="frmEnterKeyForHeader" action="https://www.cecile.co.jp/search-results/go">
-          <div class="searchitem">
-            <select name="af">
-              <option value="">全ての商品</option>
-              <option value="cat1:0ld">レディースファッション</option>
-              <option value="cat1:0in">女性下着</option>
-              <option value="cat1:0mn">メンズファッション</option>
-              <option value="cat1:0un">メンズ下着</option>
-              <option value="cat1:0uf">事務服・作業服・白衣</option>
-              <option value="cat1:0sc">制服・学生服</option>
-              <option value="cat1:0fs">ファッション・下着すべて</option>
-              <option value="cat1:0fn">家具・収納</option>
-              <option value="cat1:0bd">寝具・ベッド</option>
-              <option value="cat1:0ct">カーテン・ラグ・ファブリック</option>
-              <option value="cat1:0lf">キッチン・雑貨・日用品</option>
-              <option value="cat1:0bt">美容・健康・サプリメント</option>
-            </select>
-          </div>
-          <div class="searchitem search-txt">
-            <input name="w" id="q" type="text" value="" maxlength="130" autocomplete="off" data-provide="rac" onkeydown="" placeholder="キーワードを入力" >
-            <input type="hidden" name="L" value="cecileapp">
-            <input type="hidden" name="utm_source" value="cecile_dinos_apps">
-            <input type="hidden" name="utm_medium" value="app">
-          </div>
-          <div class="searchitem btn">
-            <i class="material-icons submit">search</i>
-          </div>
-        </form>
+      <div class="settings">
+        <a href="settings"><i class="material-icons submit">settings</i></a>
+      </div>
+      <img src="/static/images/logo.gif">
+      <div class="searchbox">
+        <div class="searcharea">
+          <form method="get" id="frmEnterKeyForHeader" action="https://www.cecile.co.jp/search-results/go">
+            <div class="searchitem search-cat">
+              <select name="af">
+                <option value="">すべての商品から</option>
+                <option value="cat1:0ld">レディースファッション</option>
+                <option value="cat1:0in">女性下着</option>
+                <option value="cat1:0mn">メンズファッション</option>
+                <option value="cat1:0un">メンズ下着</option>
+                <option value="cat1:0uf">事務服・作業服・白衣</option>
+                <option value="cat1:0sc">制服・学生服</option>
+                <option value="cat1:0fs">ファッション・下着すべて</option>
+                <option value="cat1:0fn">家具・収納</option>
+                <option value="cat1:0bd">寝具・ベッド</option>
+                <option value="cat1:0ct">カーテン・ラグ・ファブリック</option>
+                <option value="cat1:0lf">キッチン・雑貨・日用品</option>
+                <option value="cat1:0bt">美容・健康・サプリメント</option>
+              </select>
+            </div>
+            <div class="searchitem search-txt">
+              <input name="w" id="q" type="text" value="" maxlength="130" autocomplete="off" data-provide="rac" onkeydown="" placeholder="キーワードを入力" >
+              <input type="hidden" name="L" value="cecileapp">
+              <input type="hidden" name="utm_source" value="cecile_dinos_apps">
+              <input type="hidden" name="utm_medium" value="app">
+            </div>
+            <div class="searchitem btn">
+              <i class="material-icons submit">search</i>
+            </div>
+          </form>
+        </div>
       </div>
     </header>
     <div class="container">
@@ -426,7 +494,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
       </div>
 '''
   html += ranking
-  html += buyer
+#  html += buyer
   html += pickup
   html += coordinate
 
@@ -436,6 +504,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/LD/','レディースファッション'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/LD/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g3-1-LD-TS-1I/','Tシャツ'],
         ['https://www.cecile.co.jp/genre/g3-1-LD-TS-BR/','ブラウス'],
         ['https://www.cecile.co.jp/genre/g2-1-LD-TS/','トップス'],
@@ -458,6 +527,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/IN/','女性下着'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/IN/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g2-1-IN-BS/','ブラジャー'],
         ['https://www.cecile.co.jp/genre/g2-1-IN-SU/','ブラ＆ショーツセット'],
         ['https://www.cecile.co.jp/genre/g2-1-IN-SH/','ショーツ'],
@@ -475,6 +545,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/MN/','メンズファッション'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/MN/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g3-1-MN-TS-1I/','Tシャツ'],
         ['https://www.cecile.co.jp/genre/g3-1-MN-TS-1E/','ポロシャツ'],
         ['https://www.cecile.co.jp/genre/g3-1-MN-CT-JK/','ジャケット'],
@@ -494,6 +565,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/UN/','メンズ下着'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/UN/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g2-1-UN-IN/','肌着・インナー'],
         ['https://www.cecile.co.jp/genre/g2-1-UN-SH/','トランクス・ブリーフ'],
         ['https://www.cecile.co.jp/genre/g2-1-UN-PJ/','パジャマ・ルームウェア'],
@@ -506,6 +578,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/UF/','事務服・作業服・白衣'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/UF/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g2-1-UF-OF/','事務服・OL制服'],
         ['https://www.cecile.co.jp/genre/g2-1-UF-NS/','ナース服・白衣'],
         ['https://www.cecile.co.jp/genre/g2-1-UF-WW/','作業着・ワークウェア'],
@@ -517,6 +590,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/SC/','制服・学生服'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/SC/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g2-1-SC-HS/','高校制服'],
         ['https://www.cecile.co.jp/genre/g2-1-SC-JH/','中学校制服'],
         ['https://www.cecile.co.jp/genre/g2-1-SC-PS/','小学校制服'],
@@ -530,6 +604,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/s/big/','大きいサイズ'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/s/big/','すべてのアイテム'],
         ['/feature/lsize/lady/','大きいサイズ レディース服'],
         ['/feature/lsize/inner/','大きいサイズ レディース下着'],
         ['/feature/lsize/men/','大きいサイズ メンズ'],
@@ -541,6 +616,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/FS/','ファッション・下着すべて'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/FS/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g3-1-FS-TS-1I/','Tシャツ'],
         ['https://www.cecile.co.jp/genre/g2-1-FS-TS/','トップス'],
         ['https://www.cecile.co.jp/genre/g3-1-FS-CT-JK/','ジャケット'],
@@ -570,6 +646,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/FN/','家具・収納'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/FN/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g2-1-FN-KT/','キッチン収納・食器棚'],
         ['https://www.cecile.co.jp/genre/g2-1-FN-CL/','衣類収納'],
         ['https://www.cecile.co.jp/genre/g2-1-FN-CO/','クローゼット・押入れ収納'],
@@ -592,6 +669,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/BD/','寝具・ベッド'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/BD/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g2-1-BD-CV/','布団カバー・シーツ'],
         ['https://www.cecile.co.jp/genre/g2-1-BD-CL/','布団・枕'],
         ['https://www.cecile.co.jp/genre/g2-1-BD-BL/','毛布・タオルケット'],
@@ -603,9 +681,10 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
     },
     {
       'main':[
-        'https://www.cecile.co.jp/genre/g1/1/CT/','カーテン・ラグ・ファブリック'
+        'https://www.cecile.co.jp/genre/g1/1/FN/','カーテン・ラグ・ファブリック'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/FN/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g2-1-CT-CT/','カーテン'],
         ['https://www.cecile.co.jp/genre/g2-1-CT-BL/','ブラインド・ロールスクリーン'],
         ['https://www.cecile.co.jp/genre/g2-1-CT-CP/','カーペット'],
@@ -622,6 +701,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/LF/','キッチン・雑貨・日用品'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/LF/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g3-1-LF-EL-1D/','扇風機'],
         ['https://www.cecile.co.jp/genre/g2-1-LF-KT/','キッチン用品'],
         ['https://www.cecile.co.jp/genre/g2-1-LF-LG/','生活雑貨'],
@@ -640,6 +720,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/genre/g1/1/BT/','美容・健康・サプリメント'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/genre/g1/1/BT/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g2-1-BT-HC/','ヘアケア・ボディケア'],
         ['https://www.cecile.co.jp/genre/g2-1-BT-PF/','コスメ・ネイル・香水'],
         ['https://www.cecile.co.jp/genre/g2-1-BT-CS/','スキンケア化粧品'],
@@ -657,6 +738,7 @@ def save_home_page(keyvisual, feature, banner, pickup, buyer, coordinate, rankin
         'https://www.cecile.co.jp/bargain/','バーゲン'
       ],
       'sub': [
+        ['https://www.cecile.co.jp/bargain/','すべてのアイテム'],
         ['https://www.cecile.co.jp/genre/g1/1/LD/bargain/','レディースファッション'],
         ['https://www.cecile.co.jp/genre/g1/1/IN/bargain/','女性下着'],
         ['https://www.cecile.co.jp/genre/g1/1/MN/bargain/','メンズファッション'],

@@ -1,45 +1,468 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="/static/css/common.css?v=0001">
+<meta charset="utf-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>デジタルカタログ CECILE</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/static/catalog/css/default.css">
+<link rel="stylesheet" type="text/css" href="/static/catalog/css/index_test.css">
+<script type="text/javascript" src="/static/catalog/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="/static/catalog/js/jquery.mousewheel.min.js"></script>
+<script type="text/javascript" src="/static/catalog/js/library.js"></script>
+<script type="text/javascript" src="/static/catalog/js/index_test.js?v=1.01"></script>
+<style></style>
 </head>
-<body>
-  <div id="contents">
-    <header>
-      <div class="settings">
-        <a href="settings"><i class="material-icons submit">settings</i></a>
-      </div>
-      <img src="/static/images/logo.gif">
-      <h3>カタログ画像検索</h3>
-    </header>
-    <div class="search_history">
-      <div class="title"><i class="material-icons submit">history</i>検索履歴</div>
-      <ul class="search_history">
-        <li>
-          <a href="/history/1627965388043.jpg">
-            <img src="/static/media/20210803110645_scaled_image_picker4959075106236864670.jpg">
-          </a>
-        <li>
-          <a href="/history/1627965388043.jpg">
-            <img src="/static/media/20210803110111_scaled_image_picker992461097714249644.jpg">
-          </a>
-      </ul>
-      <br style="clear:both;"/>
-      <div class="title"><i class="material-icons submit">search</i>検索</div>
-    </div>
-    <div class="camera">
-      <div class="select_photo">
-        <div>
-          <div class="camera"><a href="https://cecile-dev.prm.bz/gallery"><i class="material-icons">add_a_photo</i><br />写真を撮る</a></div>
-        </div>
-      </div>
 
-      <div class="detail_re">
-        <p>検索を行われる場合、上のカメラアイコンを選択し、検索する写真を撮影してください。</p>
-      </div>
-    </div>
-  </div>
+<body>
+<div id="Wrapper">
+
+<div id="BtnList">
+<div id="SpMenuBtn"></div>
+<div class="spScroll">
+<ul>
+<li id="SpPurchaseBtn" class="cmnBtn onlySp">このページの<br>商品を購入</li>
+<li id="SpUrlCopy" class="cmnBtn onlySp"><button>ページのURLをコピー</button></li>
+<li id="SpFavorite" class="cmnBtn onlySp"><span>お気に入りページ</span></li>
+<li id="SpFavoriteBtn" class="cmnBtn onlySp">お気に入り<br>ページに追加</li>
+<li id="CatalogBtn" class="cmnBtn">カタログ請求</li>
+<!--<li id="PrintBtn" class="cmnBtn">印刷</li>-->
+<li id="PdfBtn" class="cmnBtn">PDF</li>
+<li id="SettingBtn" class="cmnBtn">設定</li>
+<!--<li id="HelpBtn" class="cmnBtn">ヘルプ</li>-->
+<li id="SpAutoBtn" class="cmnBtn onlySp">自動再生</li>
+<li id="SpShareBtn" class="cmnBtn"><button>ページを共有する</button></li>
+<li id="SpBackBtn" class="cmnBtn onlySp">戻る</li>
+<li id="CloseBtn" class="cmnBtn"><span>メニューを</span>閉じる</li>
+</ul>
+</div>
+</div>
+
+<div id="MenuArea">
+<ul id="MenuList">
+<li id="MenuIndex"><span>もくじ</span></li>
+<li id="CatalogBtn" class="home"><span>カタログ<br>一覧</span></li>
+<li id="MenuVisualMenu"><span>ビジュアル<br>メニュー</span></li>
+<li id="MenuKeyword"><span>キーワード<br>検索</span></li>
+<li id="MenuTagList"><span>付箋<br>リスト</span></li>
+<li id="MenuFavorite"><span>お気に入り<br>リスト</span></li>
+<li id="ShareBtn"><span>カタログ<br>メニュー</span></li>
+<li class="close">閉じる</li>
+</ul>
+<div id="MenuContentArea">
+
+<div id="IndexList" class="menuContent scrollArea">
+<div class="header">
+<div class="closeBtn"></div>
+<h2>もくじ</h2>
+</div>
+<ul>
+<!--jsで要素を挿入-->
+</ul>
+</div><!--/IndexList-->
+
+<div id="CatalogMenu" class="menuContent scrollArea">
+<div class="header">
+<div class="closeBtn"></div>
+<h2>カタログメニュー</h2>
+</div>
+<ul class="visualList single">
+<!--jsで要素を挿入-->
+</ul>
+</div><!--/CatalogMenu-->
+
+<div id="VisualMenu" class="menuContent scrollArea">
+<div class="header">
+<div class="closeBtn"></div>
+<h2>ビジュアルメニュー</h2>
+</div>
+<ul class="visualList">
+<!--jsで要素を挿入-->
+</ul>
+</div><!--/VisualMenu-->
+
+<div id="SearchArea" class="menuContent scrollArea">
+<div class="header">
+<div class="closeBtn"></div>
+<h2>キーワード検索</h2>
+</div>
+<div id="SearchInputArea">
+<div class="cmnTitle">キーワード検索</div>
+<form id="SearchForm" action="javascript:void(0);">
+<input id="SearchText" class="textbox" type="text" placeholder="商品名、商品コード">
+<button id="SearchSubmit" class="cmnBtn">Search</button>
+</form>
+</div>
+<div id="SearchList">
+<div class="cmnTitle">検索結果一覧</div>
+<div id="SearchMessage"></div>
+<ul>
+<!--jsで要素を挿入-->
+</ul>
+</div><!--/SearchList-->
+</div><!--/SearchArea-->
+
+<div id="TagList" class="menuContent">
+<div class="header">
+<div class="closeBtn"></div>
+<h2>付箋リスト</h2>
+</div>
+<div class="cmnBtn deleteAll">付箋をすべて削除</div>
+<ul class="scrollArea" style="overflow-y: scroll;">
+<!--jsで要素を挿入-->
+</ul>
+<div id="TagDeleteAll" class="spDialog">
+<div class="window">
+<p>全ページを削除しますか？</p>
+<ul class="taCenter">
+<li class="cmnBtn enter" style="padding: 3px 10px;">YES</li><li class="cmnBtn cancel" style="padding: 3px 10px;">NO</li>
+</ul>
+</div>
+</div>
+
+</div><!--/TagList-->
+
+<div id="FavoriteList" class="menuContent">
+<div class="header">
+<div class="closeBtn"></div>
+<h2>お気に入りリスト</h2>
+</div>
+<div class="cmnBtn deleteAll">お気に入りをすべて削除</div>
+<ul class="visualList scrollArea" style="overflow-y: scroll;">
+<!--jsで要素を挿入-->
+</ul>
+<div id="FavoriteDeleteAll" class="spDialog">
+<div class="window">
+<p>全ページを削除しますか？</p>
+<ul class="taCenter">
+<li class="cmnBtn enter">YES</li><li class="cmnBtn cancel">NO</li>
+</ul>
+</div>
+</div>
+</div><!--/FavoriteList-->
+
+
+</div><!--/MenuContentArea-->
+</div><!--/MenuArea-->
+
+<div id="SliderArea">
+<ul>
+
+<li>
+<div class="pageArea">
+<div class="pageAreaInner">
+<div class="thumbnail"></div>
+<div class="mainImg size1"></div>
+<div class="mainImg size2"></div>
+<div class="mainImg size3"></div>
+<div class="canvas"><canvas></canvas></div>
+<div class="linkLayer"></div>
+<div class="tagLayer"></div>
+<div class="highlight"></div>
+</div><!--/pageAreaInner-->
+</div><!--/pageArea-->
+</li>
+
+<li>
+<div class="pageArea">
+<div class="pageAreaInner">
+<div class="thumbnail"></div>
+<div class="mainImg size1"></div>
+<div class="mainImg size2"></div>
+<div class="mainImg size3"></div>
+<div class="canvas"><canvas></canvas></div>
+<div class="linkLayer"></div>
+<div class="tagLayer"></div>
+<div class="highlight"></div>
+</div><!--/pageAreaInner-->
+</div><!--/pageArea-->
+</li>
+
+<li>
+<div class="pageArea">
+<div class="pageAreaInner">
+<div class="thumbnail"></div>
+<div class="mainImg size1"></div>
+<div class="mainImg size2"></div>
+<div class="mainImg size3"></div>
+<div class="canvas"><canvas></canvas></div>
+<div class="linkLayer"></div>
+<div class="tagLayer"></div>
+<div class="highlight"></div>
+</div><!--/pageAreaInner-->
+</div><!--/pageArea-->
+</li>
+
+</ul>
+</div><!--/SliderArea-->
+<div id="PageBtnLeft"></div>
+<div id="PageBtnRight"></div>
+
+<div id="AreaNavi">
+<h2>エリアナビ</h2>
+<div class="toggleBtn"></div>
+<div class="imgArea">
+<div class="img"></div>
+<div class="bg bgT"></div>
+<div class="bg bgL"></div>
+<div class="bg bgR"></div>
+<div class="bg bgB"></div>
+<div class="area"></div>
+</div>
+</div>
+
+<div id="BtmArea">
+
+<div id="Footer" class="clearfix">
+<div id="PageSliderArea">
+<div id="PageSlider">
+<div id="PageNum"></div>
+</div>
+</div>
+<div class="block">
+<ul class="btnList tool">
+<li id="ZoomInBtn">拡大</li>
+<li id="ZoomOutBtn">縮小</li>
+<li id="AutoBtn">自動再生</li>
+<li id="TagBtn">付箋</li>
+<li id="PageShareBtn">共有</li>
+<li id="CatalogFavoriteBtn">お気に入り</li>
+<li id="PurchaseBtn">このページの<br>商品を購入</li>
+<li id="PenBtn">ペン</li>
+</ul>
+</div><!--
+--><div class="block">
+<!--
+<div id="PageJumpArea" class="page">
+<div class="text">ページ番号を入力</div>
+<form id="PageJump">
+<input id="PageInput" class="textbox" type="text" autocomplete="off"> /<span id="PageTotal"></span>
+<button class="cmnBtn">GO</button>
+</form>
+</div>
+</div>--><!--
+--><div class="block spHide">
+<ul id="PageBtn">
+<li class="leftEnd">先頭へ</li>
+<li class="left">前のページへ</li>
+<li class="right">次のページへ</li>
+<li class="rightEnd">最後へ</li>
+</ul>
+</div><!--
+--><div class="block spHide">
+<ul class="btnList">
+<li id="BackBtn" class="disabled">戻る</li>
+<li id="FavoriteBtn">お気に入り<br>ページに追加</li>
+<li id="PurchaseBtn">このページの<br>商品を購入</li>
+<li id="UrlCopyBtn"><button>このページの<br>URLをコピー</button><div class="text"></div></li>
+</ul>
+</div>
+</div><!--/Footer-->
+
+</div><!--/BtmArea-->
+
+<div id="AutoMenu" class="window">
+<div id="AutoInterval">
+<div class="label">時間指定</div>
+<ul></ul>
+</div><!--
+--><ul id="AutoDirection">
+<li class="current">逆送り</li>
+<li>順送り</li>
+</ul>
+</div>
+
+<div id="TagColor" class="spDialog">
+<div class="window">
+<p>付箋の色をお選び下さい</p>
+<ul>
+<li class="color1"></li>
+<li class="color2"></li>
+<li class="color3"></li>
+<li class="color4"></li>
+<li class="color5"></li>
+</ul>
+<div class="closeBtn"><span>閉じる</span></div>
+</div>
+</div>
+
+<div id="PenTool" class="window">
+<div class="title">ペン</div>
+<div class="closeBtn"></div>
+<div class="content clearfix">
+<div class="block">
+<p>太さ</p>
+<div class="selectList width">
+<ul class="spSelect"><li class="width1"></li></ul>
+<ul id="PenToolSelectWidth" class="select">
+<li class="width1 selected"></li>
+<li class="width2"></li>
+<li class="width3"></li>
+</ul>
+</div>
+</div>
+<div class="block">
+<p>色</p>
+<div class="selectList">
+<ul class="spSelect"><li class="color1"></li></ul>
+<ul id="PenToolSelectColor" class="select">
+<li class="color1 selected"></li>
+<li class="color2"></li>
+<li class="color3"></li>
+<li class="color4"></li>
+<li class="color5"></li>
+</ul>
+</div>
+</div>
+<div class="block">
+<p>戻る</p>
+<div class="back"></div>
+</div>
+<div class="block">
+<p>全消去</p>
+<div class="clear"></div>
+</div>
+</div>
+</div><!--/PenTool-->
+
+<div id="PrintDialog" class="dialog">
+<div class="window">
+<h2 class="iconTitle">印刷<span>PRINT OUT</span></h2>
+<label class="checkbox"><input type="checkbox"><span>ページ上の付箋・ペンを含める</span></label>
+<ul class="pageSelect">
+<li class="both"><div><strong>全面</strong>を印刷する</div></li>
+<li class="left"><div><strong>左面</strong>を印刷する</div></li>
+<li class="right"><div><strong>右面</strong>を印刷する</div></li>
+</ul>
+<div class="btnArea print">
+<div class="btn">印刷</div>
+</div>
+<div class="btnArea">
+<div class="btn">キャンセル</div>
+</div>
+</div>
+</div>
+
+<div id="PdfDialog" class="dialog">
+<div class="window">
+<h2 class="iconTitle">PDFファイル<span>PDF FILE</span></h2>
+<ul class="pageSelect">
+<li class="both"><div><strong>全面</strong>のPDFを開く</div></li>
+<li class="left"><div><strong>左面</strong>のPDFを開く</div></li>
+<li class="right"><div><strong>右面</strong>のPDFを開く</div></li>
+</ul>
+<div class="btnArea">
+<div class="btn">キャンセル</div>
+</div>
+</div>
+</div>
+
+<div id="SettingDialog" class="dialog">
+<div class="window">
+<h2 class="iconTitle">設定<span>SETTING</span></h2>
+<p class="lead">操作方法や表示方法を変更することができます</p>
+<div class="wheel">
+<h3>マウスホイール操作</h3>
+<ul class="radioList">
+<li><label class="checkbox"><input type="radio" name="setting01"><span>拡大・縮小</span></label></li>
+<li><label class="checkbox"><input type="radio" name="setting01"><span>紙面スクロール</span></label></li>
+<li><label class="checkbox"><input type="radio" name="setting01"><span>ページ送り</span></label></li>
+</ul>
+</div>
+<h3>ページ移動時の表示サイズ</h3>
+<ul class="radioList mb20">
+<li><label class="checkbox"><input type="radio" name="setting02"><span>全体を表示</span></label></li>
+<li><label class="checkbox"><input type="radio" name="setting02"><span>拡大したまま表示</span></label></li>
+</ul>
+<div class="btnArea">
+<div class="btn">閉じる</div>
+</div>
+</div>
+</div>
+
+<div id="HelpDialog" class="dialog">
+<div class="window">
+<h2 class="iconTitle">ヘルプ<span>HELP</span></h2>
+<ul class="pc">
+<li>
+<div class="icon"><img src="/static/catalog/img/help_ico_pc_swipe.png" alt=""></div>
+<p class="text">左右の矢印ボタンをクリックすると、ページをめくれます。</p>
+</li>
+<li>
+<div class="icon"><img src="/static/catalog/img/help_ico_pc_click.png" alt=""></div>
+<p class="text">紙面をダブルクリックすると、拡大・縮小ができます。</p>
+</li>
+<li>
+<div class="icon"><img src="/static/catalog/img/help_ico_pc_link.png" alt=""></div>
+<p class="text">紙面内赤枠をクリックすると、関連ページへリンクします。</p>
+</li>
+</ul>
+<ul class="sp">
+<li>
+<div class="icon"><img src="/static/catalog/img/help_ico_swipe.png" alt=""></div>
+<p class="text">紙面を左右にスワイプするとページがめくれます。</p>
+</li>
+<li>
+<div class="icon"><img src="/static/catalog/img/help_ico_pinch.png" alt=""></div>
+<p class="text">紙面をピンチイン・アウトまたはダブルタップすると紙面が拡大できます。<br>※機種によってはピンチイン・アウトできない場合があります。</p>
+</li>
+<li>
+<div class="icon"><img src="/static/catalog/img/help_ico_link.png" alt=""></div>
+<p class="text">紙面内赤枠をタップすると、関連ページへリンクします。</p>
+</li>
+</ul>
+<div class="btnArea">
+<div class="btn">閉じる</div>
+</div>
+</div>
+</div>
+
+<div id="PageUrlDialog" class="dialog">
+<div class="window">
+<p>URLをコピーしてください</p>
+<textarea></textarea>
+<div class="btnArea">
+<div class="btn">閉じる</div>
+</div>
+</div>
+</div>
+
+<div id="MessageDialog" class="dialog">
+<div class="window">
+<p class="text"></p>
+<div class="btnArea">
+<div class="btn">OK</div>
+</div>
+</div>
+</div>
+
+<div id="Tooltip"></div>
+
+</div><!--/Wrapper-->
+
+<div id="Loading"><img src="/static/catalog/img/loading.png" alt=""></div>
+
+<div id="PrintArea">
+<div class="page01">
+<div class="inner">
+<div class="mainImg"></div>
+<div class="canvas"><canvas></canvas></div>
+<div class="tagLayer"></div>
+</div>
+</div>
+<div class="page02">
+<div class="inner">
+<div class="mainImg"></div>
+<div class="canvas"><canvas></canvas></div>
+<div class="tagLayer"></div>
+</div>
+</div>
+</div>
+
 </body>
 </html>

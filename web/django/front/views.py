@@ -11,9 +11,6 @@ import imagehash
 class DegitalcatalogView(View):
     def get(self, request, *args, **kwargs):
         self.template_name = "front/viewer.html"
-        context = {
-            'code': '15101',
-        }
         return render(self.request, self.template_name)
 
 class ViewerView(View):
@@ -47,11 +44,12 @@ class SimilarView(View):
         filename_save = form.save()
 
         # 画像処理
+        # カタログの表紙判定
         media_dir = '/opt/app/cecile/data'
         target = media_dir+filename_save.replace('/static','')
-        target_hash = imagehash.average_hash(Image.open(target))
+        target_hash = imagehash.phash(Image.open(target))
         
-        userpath = '/opt/app/cecile/data/hash/'
+        userpath = '/opt/app/cecile/data/imgsearch/hash/catalog/'
         image_files = []
         f = [os.path.join(userpath, path) for path in os.listdir(userpath)]
         for i in f:
@@ -59,17 +57,36 @@ class SimilarView(View):
         
         idx = {'haming':1000, 'path':''}
         for img in image_files:
-            hash = imagehash.average_hash(Image.open(img))
+            hash = imagehash.phash(Image.open(img))
             haming = target_hash - hash
             if idx['haming'] > haming:
                 idx['path'] = img
                 idx['haming'] = haming
         
-        pagepath = idx['path'].replace('/opt/app/cecile/data/hash/','').replace('.jpg','')
-        template_name = "front/sample/"+pagepath+".html"
+        template_name = "front/sample/catalog.html"
+        catalog_data = '<div class="nodata">情報がみつかりませんでした</div>'
+        if idx['haming'] < 20:
+            code = idx['path'].replace('/opt/app/cecile/data/imgsearch/hash/catalog/','').replace('.jpg','')
+            data = CatalogMaster.objects.get(catalog=code)
+            genre = CatalogGenreLink.objects.get(catalog=code)
+
+            catalog_data = '<div class="title"><i class="material-icons submit">manage_search</i>検索されたカタログ</div>'
+            catalog_data += '<ol class="search_result">'
+            catalog_data += '<li>'
+            catalog_data += '<a href="https://cecile-dev.prm.bz/viewer/'+str(code)+'/">'
+            catalog_data += '<img src="https://cecile-dev.prm.bz/static/images/s.gif" style="background-image:url('+str(data.image)+')">'
+            catalog_data += '<div>'
+            catalog_data += '<p class="title">'+str(data.name)+'</p>'
+            catalog_data += '<p><span>'+str(genre.genre)+'</span></p>'
+            catalog_data += '</div>'
+            catalog_data += '</a>'
+            catalog_data += '</ol>'
+
+            #template_name = "front/sample/"+pagepath+".html"
 
         context = {
             'form': form,
+            'catalog_data': catalog_data,
             'filename_save': filename_save,
         }
         return render(request, template_name, context)

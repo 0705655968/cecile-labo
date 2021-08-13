@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,7 +11,7 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show SystemChrome, rootBundle;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -60,7 +61,10 @@ Future<void> main() async {
   await Firebase.initializeApp();
   //バックグラウンド用
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
+  // 画面の向きを固定.
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(CecileApp());
 }
 
@@ -99,7 +103,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   ];
   final initialUrl = 'https://cecile-dev.prm.bz/home';
   final List<String> browserLinkList = [
-    'www.cecile.co.jp','faq.cecile.co.jp'
+    'cecile-dev.prm.bz'
   ];
   final _selectedItemColor = Colors.white;
   final _unselectedItemColor = Color.fromRGBO(99, 99, 99, 1.0);
@@ -113,26 +117,31 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
       WebView.platform = SurfaceAndroidWebView();
     }
     _timer = Timer.periodic(
-      Duration(seconds: 5), // 1秒毎に定期実行
+      Duration(seconds: 3), // 1秒毎に定期実行
       (Timer timer) {
         setState(() async { // 変更を画面に反映するため、setState()している
-          final logDirectory = await getApplicationDocumentsDirectory();
-          newsId = await File('${logDirectory.path}/push.log').readAsString();
-          if(newsId != '') {
-            try {
-              _selectedIndex = 0;
-              _webViewController.loadUrl('https://cecile-dev.prm.bz/home?nid=' + newsId);
-              print(newsId);
-              final dir = Directory('${logDirectory.path}/push.log');
-              dir.deleteSync(recursive: true);
-              timer.cancel();
-            } catch (err) {
-              print(err);
+          try {
+            final logDirectory = await getApplicationDocumentsDirectory();
+            newsId = await File('${logDirectory.path}/push.log').readAsString();
+            if (newsId != '') {
+              try {
+                _selectedIndex = 0;
+                _webViewController.loadUrl(
+                    'https://cecile-dev.prm.bz/home?nid=' + newsId);
+//              print(newsId);
+                final dir = Directory('${logDirectory.path}/push.log');
+                dir.deleteSync(recursive: true);
+                timer.cancel();
+              } catch (err) {
+                // print(err);
+              }
+            }
+            else{
+              if(++_timerCnt > 3) timer.cancel();
             }
           }
-          else{
-//            print(++_timerCnt);
-            if(++_timerCnt > 3) timer.cancel();
+          catch(err){
+            timer.cancel();
           }
         });
       },
@@ -155,10 +164,10 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
         newsId = message.data['news'];
         _selectedIndex = 0;
         _webViewController.loadUrl('https://cecile-dev.prm.bz/home?nid=' + newsId);
-        print(newsId);
+//        print(newsId);
         _timer.cancel();
       } catch (err) {
-        print(err);
+  //      print(err);
       }
     });
     FirebaseMessaging.onMessage.listen((message) {
@@ -174,7 +183,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
         _timer.cancel();
         if(_debug) print(newsId);
       } catch (err) {
-        print(err);
+  //      print(err);
       }
     });
   }
@@ -537,7 +546,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                 );
                 return NavigationDecision.prevent;
               }
-              else if (browserLinkList.indexOf(uri.host) >= 0) {
+              else if (browserLinkList.indexOf(uri.host) < 0) {
                 if (await canLaunch(request.url)) {
                   // 外部ブラウザで遷移
                   await launch(

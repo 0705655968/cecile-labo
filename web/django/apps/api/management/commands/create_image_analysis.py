@@ -2,7 +2,7 @@
 from django.core.management.base import BaseCommand
 from django.db import connection
 from ...models import *
-from apps.api.utils.crud_pages import *
+from apps.api.utils.img_analysis import *
 import os
 from django.utils import timezone
 from datetime import datetime
@@ -30,8 +30,6 @@ class Command(BaseCommand):
             #logger.debug("Error:多重起動エラー")
             exit()
 
-        # 新着情報ページの作成
-        updates_news_page()
+        # image hashの対象となる画像データを作成
+        updates_image_hash()
 
-        # ホーム画面の作成
-#        updates_home_page()
