@@ -44,11 +44,10 @@ brew install cocoapods
 
 echo "cd ios && pod install..."
 
-cd /Volumes/workspace/repository/native/ios/
-
-ls -l
+cd /Volumes/workspace/repository/native/
+flutter pub get
 
 # Install CocoaPods dependencies.
-#pod install # run `pod install` in the `ios` directory.
+cd ios && pod install
 
 exit 0
