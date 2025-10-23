@@ -33,13 +33,15 @@ ls -l
 echo "flutter clean..."
 flutter clean
 
-# Install Flutter dependencies.
-flutter pub get
-
 # エラーが出たのでコメントアウト
 cd /Volumes/workspace/repository/native/
 rm -rf ios/Pods/ ios/Podfile.lock
 #flutter build ios --no-codesign --no-tree-shake-icons
+
+cd "$HOME/flutter/bin"
+
+# Install Flutter dependencies.
+flutter pub get
 
 echo "HOMEBREW_NO_AUTO_UPDATE=1..."
 
@@ -60,7 +62,9 @@ flutter pub get
 cd /Volumes/workspace/repository/native/ios/
 pod deintegrate
 
+cd /Volumes/workspace/repository/native/
+
 # Install CocoaPods dependencies.
-pod install
+pod install --project-directory=ios
 
 exit 0
