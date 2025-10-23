@@ -41,8 +41,7 @@ brew install cocoapods
 
 echo "cd ios && pod install..."
 
-cd native
-cd ios
+cd /Volumes/workspace/repository/native/ios/
 
 ls -l
 
