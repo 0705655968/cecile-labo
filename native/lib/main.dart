@@ -1,57 +1,83 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:intl/intl.dart';
-import 'package:share/share.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:webview_cookie_manager_plus/webview_cookie_manager_plus.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' show SystemChrome, rootBundle;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fcm_config/fcm_config.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
-// バックグラウンドの処理の実態
-var newsId = '';
+// ニュースID
+var news_id = '';
+// プッシュトークン
+var token_id = '';
+// セシール暗号化客番
+var ssi_id = '';
+// アプリ内で生成した識別コード
+var app_user_id = '';
 
-// WebViewコントローラー
+// WebViewコントローラー(セシールラボ)
+late WebViewController _webViewLabController;
+// WebViewコントローラー(セシールサイト)
 late WebViewController _webViewController;
+// クッキー初利用
+late final WebviewCookieManager _cookieManager = WebviewCookieManager();
+// Firebase Messaging
 final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+// Firebase Analytics
+final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
 
 // トップレベルに定義
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  var title = message.notification!.title;
+  var body = message.notification!.body;
+  try {
+    news_id = message.data['lp'].toString();
+    final logDirectory = await getApplicationDocumentsDirectory();
+    await File('${logDirectory.path}/push.log').writeAsString(news_id);
+  } catch(err){}
+}
+/*
 Future<void> _firebaseMessagingBackgroundHandler(
     RemoteMessage _notification) async {
   await Firebase.initializeApp();
-  print("バックグラウンドでメッセージを受け取りました");
-  var title = _notification.notification!.title;
-  var body = _notification.notification!.body;
-  print(title);
-  print(body);
+  //  print('バックグラウンドでメッセージを受け取りました');
+  String title = _notification.data['title'];
+  String body = _notification.data['body'];
   try {
-    newsId = _notification.data['news'];
-    final logDirectory = await getApplicationDocumentsDirectory();
-    await File('${logDirectory.path}/push.log').writeAsString(newsId);
-    print(newsId);
-
-  } catch(err){
-    print(err);
-  }
-  FCMConfig.instance.displayNotification(title: title ?? '', body: body ?? '');
+    news_id = _notification.data['lp'].toString();
+    final Directory logDirectory = await getApplicationDocumentsDirectory();
+    await File('${logDirectory.path}/push.log').writeAsString(news_id);
+  } catch(err){}
+  // Androidでは使っていないけど、iOS限定で使っているとまずいので、とりあえず残している
+  FCMConfig.instance.local.displayNotification(title: title ?? '', body: body ?? '');
 }
+*/
 
+// Androidでは使っていなけど、iOS用のおまじないとして残しておく
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 
+// Androidでは使っていなけど、iOS用のおまじないとして残しておく
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'high_importance_channel', // id
   'High Importance Notifications', // title
-  'This channel is used for important notifications.', // description
+  description: 'This channel is used for important notifications.', // description
   importance: Importance.high,
 );
 
@@ -65,11 +91,14 @@ Future<void> main() async {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
+  /** 音声入力の権限を許可する処理だけど、うまく動かないから、一旦コメントアウト
+  if (await Permission.speech.isPermanentlyDenied) {
+    openAppSettings();
+  }*/
   runApp(CecileApp());
 }
 
 class CecileApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -84,118 +113,640 @@ class WebViewScreen extends StatefulWidget {
 }
 
 class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserver {
+  // デバッグ出力用フラグ
   final bool _debug = true;
+  // アプリ設定画面のアプリバージョンに表示される値
+  final String _appVer = '1.0.0';
+  // セシールサイトへのリンク時に、どこからのアクセスかを識別するためのパラーメータ
+  final app_param = 'utm_source=cecile_dinos_apps&utm_medium=app&utm_campaign=app_230508';
+  // アシスタント画面のURL
+  final String actualBaseUrl = 'https://cecile.yamateras.jp/';
+
   int _selectedIndex = 0;
+  int _webviewIndex = 0;
+  int _history_cnt = 0;
   bool _isLoading = false;
+  bool _isPopup = false;
   bool _isActive = false;
   bool _isBar = true;
-  int _saveImageMax = 10;
-
+  bool _showAppBar = false;
+  String _initapp = '0';
+  // アシスタント処理のHTMLソースを管理する変数
+  // アプリを閉じるまで、アシスタントの表示を保持する仕様の為
+  String assistant_src = '';
   late Timer _timer;
-  int _timerCnt = 0;
 
-  List<String> _urlList = [
-    'https://cecile-dev.prm.bz/home',
-    'https://cecile-dev.prm.bz/catalog',
-    'https://cecile-dev.prm.bz/similar',
-    'https://cecile-dev.prm.bz/news',
-    'https://cecile-dev.prm.bz/settings'
-  ];
-  final initialUrl = 'https://cecile-dev.prm.bz/home';
-  final List<String> browserLinkList = [
-    'cecile-dev.prm.bz'
-  ];
+  bool _sendToken = false;
+  bool _isSsi = false;
+  bool _isSsi_Token = false;
+
+  // 色関連の固定値を管理する変数
   final _selectedItemColor = Colors.white;
   final _unselectedItemColor = Color.fromRGBO(99, 99, 99, 1.0);
   final _selectedBgColor = Color.fromRGBO(156, 20, 74, 1.0);
   final _unselectedBgColor = Colors.white;
 
+  // 初期URL
+  final String initialUrl = 'https://cecile.yamateras.jp/';
+  // メニューURL
+  List<String> _urlList = [
+    'https://cecile.yamateras.jp/',
+    'https://cecile.yamateras.jp/assistant',
+    'https://cecile.yamateras.jp/catalog',
+    'https://cecile.yamateras.jp/update',
+    'https://cecile.yamateras.jp/guide',
+    'https://cecile.yamateras.jp/receipter',
+    'https://cecile.yamateras.jp/receipt?code=',
+  ];
+  final List<String> cecileLinks = [
+    'www.cecile.co.jp', 'cfg.smt.docomo.ne.jp', 'id.smt.docomo.ne.jp', 'payment1.smt.docomo.ne.jp'
+  ];
+
   @override
   void initState() {
     super.initState();
-    if (Platform.isAndroid) {
-      WebView.platform = SurfaceAndroidWebView();
+    if (Platform.isIOS) {
+      FirebaseMessaging.instance.requestPermission();
     }
+
+    // ブラウザビューの初期化
+    initWebViewState();
+    // プラットフォームの初期化
+    initPlatformState();
+
+    // 今回表示する、おすすめURLを取得する
+    _onRecommendUri();
+
+    // ローカルファイルに保存しているPush通知の情報があれば、
+    // その情報を利用して、PopUpダイアログを表示する
     _timer = Timer.periodic(
-      Duration(seconds: 3), // 1秒毎に定期実行
+      Duration(seconds: 3), // 3秒毎に定期実行
       (Timer timer) {
         setState(() async { // 変更を画面に反映するため、setState()している
           try {
             final logDirectory = await getApplicationDocumentsDirectory();
-            newsId = await File('${logDirectory.path}/push.log').readAsString();
-            if (newsId != '') {
+            news_id = await File('${logDirectory.path}/push.log').readAsString();
+            if (news_id != '') {
               try {
                 _selectedIndex = 0;
-                _webViewController.loadUrl(
-                    'https://cecile-dev.prm.bz/home?nid=' + newsId);
-//              print(newsId);
+                _webViewController.loadRequest(Uri.parse(news_id+'?'+app_param));
                 final dir = Directory('${logDirectory.path}/push.log');
                 dir.deleteSync(recursive: true);
-                timer.cancel();
-              } catch (err) {
-                // print(err);
               }
-            }
-            else{
-              if(++_timerCnt > 3) timer.cancel();
+              catch (err) {}
             }
           }
-          catch(err){
-            timer.cancel();
-          }
+          catch(err){}
         });
       },
     );
 
-    // 次の処理が無いと、フォアグラウンドでメッセージを受け取れないみたい
-    _firebaseMessaging.getToken().then((token) {
-      print("$token");
+    FirebaseMessaging.onMessageOpenedApp.listen((message) async {
+      news_id = message.data['lp'].toString();
+      final Directory logDirectory = await getApplicationDocumentsDirectory();
+      await File('${logDirectory.path}/push.log').writeAsString(news_id);
     });
-    if (Platform.isIOS) {
-      FirebaseMessaging.instance.requestPermission();
-    }
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      print("フォアグラウンドオープンアプリでメッセージを受け取りました");
-      _selectedIndex = 0;
-      _isActive = true;
-      _onItemTapped(_selectedIndex);
-      _isActive = false;
-      try {
-        newsId = message.data['news'];
-        _selectedIndex = 0;
-        _webViewController.loadUrl('https://cecile-dev.prm.bz/home?nid=' + newsId);
-//        print(newsId);
-        _timer.cancel();
-      } catch (err) {
-  //      print(err);
-      }
-    });
-    FirebaseMessaging.onMessage.listen((message) {
-      print("フォアグラウンドでメッセージを受け取りました");
-      _selectedIndex = 0;
-      _isActive = true;
-      _onItemTapped(_selectedIndex);
-      _isActive = false;
-      // ニュースIDがあれば取得
-      try {
-        newsId = message.data['news'];
-        _webViewController.loadUrl('https://cecile-dev.prm.bz/home?nid=' + newsId);
-        _timer.cancel();
-        if(_debug) print(newsId);
-      } catch (err) {
-  //      print(err);
-      }
+    FirebaseMessaging.onMessage.listen((message) async {
+      news_id = message.data['lp'].toString();
+      final Directory logDirectory = await getApplicationDocumentsDirectory();
+      await File('${logDirectory.path}/push.log').writeAsString(news_id);
     });
   }
 
-  // BottomNavigation 切り替えで動作
+  Future<void> initWebViewState() async {
+    /**
+     * セシールラボ用WebView
+     */
+    _webViewLabController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+          NavigationDelegate(
+            onNavigationRequest: (NavigationRequest request) {
+              if ((!request.isMainFrame) ||
+                  (initialUrl == request.url)) {
+                return NavigationDecision.navigate;
+              }
+              // ブラウザで開くリンクの判別
+              final uri = Uri.parse(request.url);
+              // グローバルメニュー選択後のページカウント数
+              _history_cnt++;
+              if (uri.path.contains('text/html')) {
+                // HTMLソースを直接WebViewに渡す場合は処理を除外する
+                // iOS向けの対策
+                return NavigationDecision.navigate;
+              }
+              else if (uri.path.contains('/app_notification')) {
+                // アプリ設定画面へ移動
+                _history_cnt = 0;
+                openAppSettings();
+                return NavigationDecision.prevent;
+              }
+              else if (uri.path == "/app_allreset") {
+                // アプリ内のデータをリセット
+                _history_cnt = 0;
+                // 削除確認ダイアログを表示
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Text('削除確認'),
+                    content:
+                    Text(
+                      'アプリ内で保持しているデータを削除してもよろしいですか？',
+                      style: TextStyle(fontSize: 14, color: _unselectedItemColor)
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('キャンセル'),
+                        onPressed: () => Navigator.of(context).pop(1),
+                      ),
+                      TextButton(
+                        child: Text('削除'),
+                        onPressed: () async {
+                          Navigator.of(context).pop(1);
+                          // WebViewのCookieを削除
+                          await _cookieManager.clearCookies();
+                          // キャッシュデータの削除
+                          await _webViewController.clearCache();
+                          await _webViewLabController.clearCache();
+                          await _webViewController.clearLocalStorage();
+                          await _webViewLabController.clearLocalStorage();
+                          assistant_src = "";
+                          // 完了メッセージを表示
+                          showDialog(
+                            context: context,
+                            builder: (_) => _buildDialog('削除完了', 'アプリ内で保持しているデータを削除しました。', 'OK')
+                          );
+                        },
+                      ),
+                    ],
+                  )
+                );
+                return NavigationDecision.prevent;
+              }
+              // 暗号化客番
+              else if (uri.path == "/app_ssi") {
+                // 暗号化客番を共有で通知する
+                _onRequestSSI();
+                return NavigationDecision.prevent;
+              }
+              else if (uri.path == "/app_notification") {
+                // プッシュ通知端末登録
+                // プッシュ通知のトークンを取得する
+                _history_cnt = 0;
+                _onRequestPermissions();
+                return NavigationDecision.prevent;
+              }
+              else if (uri.path == "/app_version") {
+                // アプリバージョンの表示
+                showDialog(
+                  context: context,
+                  builder: (_) => _buildDialog('アプリバージョン', _appVer, 'OK')
+                );
+                return NavigationDecision.prevent;
+              }
+              else if (uri.path == "/app_cacheclear") {
+                // WebViewのキャッシュを削除(Androidのみ)
+                // キャッシュクリア確認ダイアログを表示
+                _history_cnt = 0;
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Text('キャッシュ削除確認'),
+                    content:
+                    Text(
+                      'キャッシュデータを削除してもよろしいですか？',
+                      style: TextStyle(fontSize: 14,
+                        color: _unselectedItemColor)
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('キャンセル'),
+                        onPressed: () =>Navigator.of(context).pop(1),
+                      ),
+                      TextButton(
+                        child: Text('削除'),
+                        onPressed: () async {
+                          Navigator.of(context).pop(1);
+                          // キャッシュデータの削除
+                          await _webViewController.clearCache();
+                          await _webViewLabController.clearCache();
+                          assistant_src = "";
+                          // 完了メッセージを表示
+                          showDialog(
+                            context: context,
+                            builder: (_) => _buildDialog('クリア完了', 'アプリ内のキャッシュデータの削除が正常に完了しました。', 'OK')
+                          );
+                        },
+                      ),
+                    ],
+                  )
+                );
+                return NavigationDecision.prevent;
+              }
+              else if(request.url.contains('.cecile.co.jp')) {
+                /**
+                 * セシールサイトなので、ブラウザを切り替える
+                 */
+                setState(() {
+                  //_selectedIndex = 0;
+                  _webviewIndex = 1;
+                  _history_cnt = 0;
+                  _showAppBar = true;
+                  _webViewController.loadRequest(Uri.parse(request.url));
+                });
+                return NavigationDecision.prevent;
+              }
+              else if (uri.path == "/app_exit") {
+                _isBar = true;
+                _isActive = true;
+                _onItemTapped(_selectedIndex);
+                _isActive = false;
+                return NavigationDecision.prevent;
+              }
+              else if (uri.path == "/settings") {
+                // WebView内で遷移
+                _isBar = false;
+                _isActive = true;
+                _webViewLabController.clearCache();
+                _onItemTapped(_selectedIndex);
+                _webViewLabController.loadRequest(Uri.parse(_urlList[5]));
+                _isActive = false;
+                return NavigationDecision.prevent;
+              }
+              else if(request.url.contains('.pdf')
+                  || request.url.contains('mailto:')
+                  || request.url.contains('intent:')
+                  || request.url.contains('javascript')){
+                canLaunch(request.url).then((result) {
+                  // 外部ブラウザで遷移
+                  _history_cnt--;
+                  launch(
+                    request.url,
+                    forceSafariVC: false,
+                    forceWebView: false,
+                  );
+                });
+                // 何もしない
+                return NavigationDecision.prevent;
+              }
+              else if(request.url.contains('http://')){
+                // http通信はWebViewでエラーとなるので、https通信へ変換する。
+                var http_uri = request.url.replaceAll('http://','https://');
+                _webViewLabController.loadRequest(Uri.parse(http_uri));
+                return NavigationDecision.prevent;
+              }
+              // Google Analyticsのイベントログ
+              _analytics.logEvent(
+                name: "page_view",
+                parameters: {
+                  "page": request.url,
+                }
+              );
+              return NavigationDecision.navigate;
+            },
+          )
+      )
+      ..loadRequest(Uri.parse(initialUrl));
+
+    /**
+     * セシールサイト用WebView
+     */
+    _webViewController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onWebResourceError: (WebResourceError error) {
+          },
+          onPageStarted: (String url) {
+            setState(() {
+              _isLoading = true;
+            });
+          },
+          onPageFinished: (String url) async {
+            setState(() {
+              _isLoading = false;
+            });
+            _history_cnt++;
+            var host = Uri.parse(url).host;
+
+            // セシールのログインを管理しているIDをサーバーに送信
+            try{
+              bool _isCookie = false;
+              if(url.contains('CartSrv.jsp')||url.contains('CompleteSrv.jsp')||url.contains('ConfSrv.jsp')) _isCookie = true;
+              else if(url.contains('LoginSrv.jsp')){
+                _isCookie = false;
+                ssi_id = '';
+                _isSsi_Token = false;
+                _isSsi = false;
+              }
+              else if(!_isSsi) _isCookie = true;
+              /**
+               * クッキーが取得できていて、SSIの値が取得できていなければ、セシールサイトに接続して取得する
+               */
+              if(_isCookie){
+                final gotCookies = await _cookieManager.getCookies('https://www.cecile.co.jp');
+                for (var item in gotCookies) {
+                  if(item.name=='EncryptedCustNo') {
+                    // 暗号化客番
+                    ssi_id = item.value;
+                    final response = await Dio().get('https://api.interestag.jp/cecilelab/?android__'+app_user_id+'__'+ssi_id);
+                    if (token_id!='') {
+                      if(!_isSsi_Token){
+                        final response2 = await Dio().get('https://api.interestag.jp/cecilelab/?ssi_token__android__'+ssi_id+'__'+token_id);
+                        _isSsi_Token = true;
+                      }
+                    }
+                    _isSsi = true;
+                    try {
+                      if (ssi_id!='') {
+                        final logDirectory = await getApplicationDocumentsDirectory();
+                        await File('${logDirectory.path}/ssi.data').writeAsString(ssi_id);
+                      }
+                    } catch (err) {}
+                  }
+                }
+              }
+            }
+            catch(err){}
+
+            if(url.contains('.pdf')
+                || !(url.contains('www.cecile.co.jp')
+                    || url.contains('digicata.cecile.co.jp')
+                    || url.contains('extif.cecile.co.jp')
+                    || url.contains('www.e-scott.jp')
+                    || url.contains('.docomo.ne.jp')
+                )
+                || url.contains('mailto:')
+                || url.contains('facebook.com')
+                || url.contains('javascript')){
+              if (await canLaunch(url)) {
+                // 外部ブラウザで遷移
+                _history_cnt--;
+                await launch(
+                  url,
+                  forceSafariVC: false,
+                  forceWebView: false,
+                );
+              }
+              _webViewController.goBack();
+            }
+            else if(url.contains('naver.line')){
+              var uri = url.replaceAll('intent:', 'line:');
+              if (await canLaunch(uri)) {
+                // 外部ブラウザで遷移
+                _history_cnt--;
+                await launch(
+                  uri,
+                  forceSafariVC: false,
+                  forceWebView: false,
+                );
+              }
+              _webViewController.goBack();
+            }
+            else if(url.contains('http://')){
+              // http通信はWebViewでエラーとなるので、https通信へ変換する。
+              _webViewController.goBack();
+              _history_cnt--;
+              var http_uri = url.replaceAll('http://','https://');
+              _webViewController.loadRequest(Uri.parse(http_uri));
+            }
+            else if(url.contains('NetBankSelectSrv')){
+              // ネットバンクの別ウィンドウのPOST送信処理の処理調整
+              try {
+                await _webViewController.runJavaScript("document.querySelectorAll('dl.netbank-list form').forEach(function(element){let link_path='https://cecile-op.prm.bz/nbgwdmy?RD_URL='+element.action;if(element.acceptCharset) link_path+='&charset='+element.acceptCharset;element.querySelectorAll('input').forEach(function(input){link_path+='&'+input.name+'='+encodeURI(input.value);});let parent=element.querySelector('div.button');let button=parent.querySelector('button');button.removeAttribute('type');button.removeAttribute('onclick');button.setAttribute('type','button');element.setAttribute('onsubmit','return false');button.setAttribute('onclick','location.href=`'+link_path+'`');});");
+              }catch(err){}
+            }
+            else{
+              // ポップアップフラグが立っていれば、Popup情報を画面表示する
+              // _isPopup=true;
+              /*
+              if(_isPopup){
+                try {
+                  await _webViewController.runJavaScript("let _style = document.createElement('style');_style.innerText='div.dammy{position:fixed;width:100%;height:100%;top:0px;left:0px;z-index:9;background-color:rgba(0,0,0,0.5);}div.popup{position:fixed;box-sizing:border-box;width:90%;top:50%;left:5%;transform:translateY(-50%);-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);text-align:center;background-color:#fff;z-index:10;padding:15px 0px;border-radius:10px;}div.popup img{box-sizing:border-box;width:100%;height:auto;padding:0px 15px;}div.popup p{text-align:left;box-sizing:100%;padding:0px 15px;margin:0px;margin-bottom:15px;}div.popup a{text-decoration:none;}div.popup div.closebtn{font-weight:bold;display:inline-block;color:#fff;position:absolute;top:-25px;right:5px;cursor:pointer;}';let _pp=document.createElement('div');_pp.setAttribute('class','popup'),_dm=document.createElement('div');_dm.setAttribute('class','dammy');document.body.style.cssText='overflow-y:hidden';function handleTouchMove(event){event.preventDefault();}document.addEventListener('touchmove',handleTouchMove,{passive:false});let _lnk='"+_popup[0]+"',_ht='<div class=\"closebtn\">✕</div><a href=\"'+_lnk+'\"><p>"+_popup[2]+"</p><img src=\""+_popup[1]+"\"></a>';document.body.appendChild(_pp);document.body.appendChild(_dm);_pp.innerHTML=_ht;document.getElementsByTagName('head')[0].insertAdjacentElement('beforeend',_style);document.querySelector('div.closebtn').addEventListener('click',function(){document.querySelector('div.popup').style.display='none';document.querySelector('div.dammy').style.display='none';document.body.style.cssText='overflow-y:auto';document.removeEventListener('touchmove',handleTouchMove,{passive:false});});");
+                }
+                catch(err){}
+                _isPopup = false;
+              }
+              */
+              try{
+                if (app_user_id!='') {
+                  // アプリのユーザーIDをサーバーに送信
+                  try{
+                    final response = await Dio().get(
+                      'https://api.interestag.jp/cecilelab/?event_'+app_user_id+'__'+url
+                    );
+                  }
+                  catch(err){}
+                }
+                if (token_id!='') {
+                  // アプリで最初の通信処理時に、トークンIDをサーバーに送信しておく
+                  if(!_sendToken) {
+                    _sendToken = true;
+                    final response = await Dio().get('https://api.interestag.jp/?token_'+app_user_id+'__'+token_id);
+                  }
+                }
+              }
+              catch(err){}
+
+              // 閉じるボタンを消す
+              try {
+                final closebtn = await _webViewController.runJavaScriptReturningResult('document.querySelector(".button-c.-close").innerHTML;');
+                if (closebtn != '') await _webViewController.runJavaScript('document.querySelector(".button-c.-close").style.display="none";');
+              }
+              catch(err){}
+              try {
+                // アプリバナーを消す
+                final appbnr = await _webViewController.runJavaScriptReturningResult('document.querySelector(".smartbanner").innerHTML;');
+                if(appbnr!=''){
+                  await _webViewController.runJavaScript('document.querySelector(".smartbanner").style.display="none";');
+                  await _webViewController.runJavaScript('document.querySelector(".smartbanner-show").style.marginTop="0px";');
+                }
+              }
+              catch(err){}
+              try {
+                await _webViewController.runJavaScript('var anchors = document.querySelectorAll("a[href\$=pdf]");anchors.forEach(function(a){txt=a.href;a.href = "https://docs.google.com/viewer?url="+txt;});');
+              }
+              catch(err){}
+              try{
+                if(url.contains('ReceiptSrv')){
+                  final printbtn = await _webViewController.runJavaScriptReturningResult('document.querySelector(".receipt-print a").innerHTML;');
+                  if(printbtn!=''){
+                    final receiptsrc = await _webViewController.runJavaScriptReturningResult('document.querySelector("body").innerHTML;');
+                    final dio = Dio();
+                    dio.options.headers = {
+                      'Content-Type': 'application/x-www-form-urlencoded'
+                    };
+                    var formData = FormData.fromMap({
+                      'src': receiptsrc
+                    });
+                    final response = await dio.post(
+                      _urlList[5],
+                      data: formData,
+                    );
+                    if(response.data.toString()!=''){
+                      _webViewController.goBack();
+                      _history_cnt--;
+                      await launch(
+                        _urlList[6]+response.data.toString(),
+                        forceSafariVC: false,
+                        forceWebView: false,
+                      );
+                    }
+                  }
+                }
+              }
+              catch(err){}
+            }
+            // Google Analyticsのイベントログ
+            _analytics.logEvent(
+              name: "page_view",
+              parameters: {
+                "page": url,
+              }
+            );
+            debugPrint(url);
+          },
+        ),
+      );
+//      ..loadRequest(Uri.parse(initialUrl));
+  }
+
+  Future<void> initPlatformState() async {
+    _firebaseMessaging.getToken().then((token) async {
+      token_id = "$token";
+    });
+    if (!mounted) return;
+    setState(() async{
+      final logDirectory = await getApplicationDocumentsDirectory();
+      final DateTime now = DateTime.now();
+      final DateFormat outputFormat = DateFormat('HmddyyyyMM');
+      try {
+        var appId = await File('${logDirectory.path}/app.data').readAsString();
+        if (appId != '') {
+          // アプリIDをセット
+          app_user_id = appId;
+        }
+        else{
+          try {
+            app_user_id = outputFormat.format(now)+randomString(18);
+            await File('${logDirectory.path}/app.data').writeAsString(app_user_id);
+          } catch (err) {}
+        }
+      }
+      catch(err){
+        try {
+          app_user_id = outputFormat.format(now)+randomString(18);
+          await File('${logDirectory.path}/app.data').writeAsString(app_user_id);
+        } catch (err) {}
+      }
+      // 暗号化客番
+      try {
+        var _ssi = await File('${logDirectory.path}/ssi.data').readAsString();
+        if (_ssi != ''){
+          ssi_id = _ssi;
+          _onRecommendUri();
+        }
+      }
+      catch(err){}
+    });
+  }
+
+  /**
+   * アプリ用の簡易ユーザーIDの生成
+   * 端末の固有識別IDの取得が出来なくなったので。
+   */
+  String randomString(int length) {
+    const _randomChars = "_#|()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const _charsLength = _randomChars.length;
+    final rand = new math.Random();
+    final codeUnits = new List.generate(
+      length,
+          (index) {
+        final n = rand.nextInt(_charsLength);
+        return _randomChars.codeUnitAt(n);
+      },
+    );
+    return new String.fromCharCodes(codeUnits);
+  }
+
+  /**
+   * BottomNavigation 切り替えで動作
+   */
   void _onItemTapped(int index) {
+    _history_cnt = -1;
     setState(() {
+      // アシスタントモードの場合、HTMLソースを保持する
+      if(_selectedIndex == 1) {
+        // ページ読み込み完了時にHTMLを取得
+        _getHtmlSource();
+      }
+      // 表示するページのURL
       _selectedIndex = index;
-      _webViewController.loadUrl(_urlList[index]);
+      // 表示する画面がアシスタントの場合、ページキャッシュがあれば、
+      // キャッシュを表示する
+      if(index == 1 && assistant_src != ''){
+        // キャッシュを表示する
+        final Uri dataUri = Uri.dataFromString(
+          assistant_src,
+          mimeType: 'text/html',
+          encoding: Encoding.getByName('utf-8'),
+          parameters: {
+            'baseUrl': actualBaseUrl,
+          },
+        );
+        _webViewLabController.loadRequest(dataUri);
+      }
+      else {
+        // セシラボブラウザを表示
+        _webviewIndex = 0;
+        _showAppBar = false;
+
+        if (_webviewIndex == 0) _webViewLabController.loadRequest(
+            Uri.parse(_urlList[index]));
+        /*
+        else if(index==3){
+          // 暗号化客番付でお知らせ配信履歴画面を開く
+          String _uri = _urlList[index]+ssi_id;
+          _webViewCecileController.loadRequest(Uri.parse(_uri));
+        }
+        */
+        else
+          _webViewController.loadRequest(Uri.parse(_urlList[index]));
+        // Google Analyticsのイベントログ
+        _analytics.logEvent(
+          name: "menu_view",
+          parameters: {
+            "menu": index,
+          }
+        );
+      }
     });
   }
 
+  /**
+   * WebViewからHTMLソースを取得する
+   */
+  Future<void> _getHtmlSource() async {
+    try{
+      // JavaScriptを実行してHTML全体を取得
+      // 'document.documentElement.outerHTML'はページ全体のHTML要素を文字列として返します
+      final String html = await _webViewLabController.runJavaScriptReturningResult(
+          "document.documentElement.outerHTML"
+      ) as String;
+      setState(() {
+        assistant_src = html.isNotEmpty ? jsonDecode(html).toString() : "";
+      });
+    }
+    catch(e){
+      setState((){
+        assistant_src = "";
+      });
+    }
+  }
+
+  /**
+   * 共有機能を利用して、取得しているトークンを表示する
+   */
   Future<void> _onRequestPermissions() async {
     _firebaseMessaging.getToken().then((token) async {
       // 取得したトークンを共有する
@@ -203,16 +754,17 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     });
   }
 
-  // 検索中画面の表示
-  Future<void> _onFindingDisplay() async {
-    _webViewController.loadUrl(Uri.dataFromString(
-      await rootBundle.loadString('assets/html/wait.html'),
-      mimeType: 'text/html',
-      encoding: Encoding.getByName('utf-8')
-    ).toString());
+  /**
+   * 共有機能を利用して、取得しているSSIを表示する
+   */
+  Future<void> _onRequestSSI() async {
+    await Share.share(ssi_id);
   }
 
-  // 検索履歴画面
+  /**
+   * エラーメッセージ表示ダイアログ
+   * OKボタン選択後に、指定した処理を実行する
+   */
   Future<void> _onWebPageByErrMsg(String message, int index) async {
     showDialog(
         context: context,
@@ -221,20 +773,13 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
           content: Text(message
               , style: TextStyle(fontSize: 14, color: _unselectedItemColor)),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text('OK'),
               onPressed: () async {
                 Navigator.of(context).pop(1);
-                // 指定ページへ遷移
-                if(index == 99){
-                  // 検索履歴画面
-                  _webViewController.loadUrl(Uri.dataFromString(
-                    await _onHistoryList(),
-                    mimeType: 'text/html',
-                    encoding: Encoding.getByName('utf-8')
-                  ).toString());
-                }
-                else _webViewController.loadUrl(_urlList[index]);
+                // キャッシュをクリアし、指定ページへ遷移する
+                await _webViewLabController.clearCache();
+                _webViewLabController.loadRequest(Uri.parse(_urlList[index]));
               },
             ),
           ],
@@ -242,70 +787,51 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     );
   }
 
+  /**
+   * 今のおすすめURLの取得処理
+   */
+  Future<void> _onRecommendUri() async {
+    /*
+    List _recommends = [
+      <String>[
+        'https://www.cecile.co.jp/feature/gift/',
+        'https://www.cecile.co.jp/genre/g1/1/UN/bargain/',
+      ],
+      <String>[
+        'https://lw.cecile.co.jp/feature/gift/',
+        'https://lw.cecile.co.jp/genre/g1/1/UN/bargain/',
+      ]
+    ];
 
-  // 画像検索処理
-  Future<void> _onSimilar(String imgFile, bool history) async {
-    try{
+    try {
       final dio = Dio();
-      dio.options.headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      };
-      var formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(imgFile)
-      });
-      final response = await dio.post(
-        _urlList[2],
-        data: formData,
+      final response = await dio.get(
+        'https://cecile-app.prm.bz/recommend?ssi='+ssi_id+'&did='+device_id,
       );
-      _webViewController.loadUrl(Uri.dataFromString(
-          response.data,
-          mimeType: 'text/html',
-          encoding: Encoding.getByName('utf-8')
-      ).toString());
+      _urlList[0][1] = response.data;
+      _urlList[1][1] = response.data;
     } catch (err) {
-      _onWebPageByErrMsg(
-        "カタログ画像検索処理に失敗しました。\nお手数ですが再度処理を行ってください。",
-          (history) ? 99: 2
-      );
+      _urlList[0][1] = _recommends[_accessPoint][math.Random().nextInt(2)];
+      _urlList[1][1] = _recommends[_accessPoint][math.Random().nextInt(2)];
     }
+    */
   }
 
-  // 検索履歴画面
-  Future<String> _onHistoryList() async {
-    var userDirectory = await getApplicationDocumentsDirectory();
-    var histories = "";
-    List<FileSystemEntity> files = userDirectory.listSync(
-        recursive: true, followLinks: false);
-    files.sort((a, b) => a.toString().compareTo(b.toString()));
-    for (var file in files.reversed) {
-      if (file.path.contains('jpg')) {
-        if (_debug) print(file.path);
-        // 画像データをBASE64エンコードし、imgタグに直接指定
-        String img64 = base64Encode(File(file.path).readAsBytesSync());
-        String fileName = file.path
-            .split('/')
-            .last;
-        histories += '<li><a href="https://cecile-dev.prm.bz/history_find/' + fileName + '"><img src="https://cecile-dev.prm.bz/static/images/s.gif" style="background:url(data:image/jpeg;base64,' + img64 + ');background-size:cover;"></a>';
-      }
-    }
-    // HTMLの生成
-    var historyPage = await rootBundle.loadString('assets/html/history.html');
-    if (histories != '')
-      historyPage = historyPage.replaceAll('<template>', '<ul class="search_history">' + histories + '</ul>');
-    else
-      historyPage = historyPage.replaceAll('<template>', '<div class="nodata">過去に撮影した写真はありません。</div>');
-    return Future<String>.value(historyPage);
-  }
-
-  // 背景色
+  /**
+   * 下部メニューの背景色を動的に変更する
+   */
   Color _getBgColor(int index) =>
       _selectedIndex == index ? _selectedBgColor : _unselectedBgColor;
 
-  // テキスト色
+  /**
+   * 下部メニューの文字色を動的に変更する
+   */
   Color _getItemColor(int index) =>
       _selectedIndex == index ? _selectedItemColor : _unselectedItemColor;
 
-  // アイコンに背景を設定する
+  /**
+   * 下部メニューのアイコンに背景を設定する
+   */
   Widget _buildIcon(IconData iconData, String text, int fontsize, int index) => Container(
     width: double.infinity,
     height: kBottomNavigationBarHeight,
@@ -316,7 +842,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Icon(iconData, size: 28.0, color: _getItemColor(index)),
-            Text(text, style: TextStyle(fontSize: 9, color: _getItemColor(index))),
+            Text(text, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 9,height: 1.1, color: _getItemColor(index))),
           ],
         ),
         onTap: () => _onItemTapped(index),
@@ -324,297 +850,176 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     ),
   );
 
-  // ダイアログ
+  /**
+   * 文字列のダイアログを表示
+   */
   Widget _buildDialog(String title, String message, String btn) => AlertDialog(
     title :Text(title),
     content: Text(message
         , style: TextStyle(fontSize: 14, color: _unselectedItemColor)),
     actions: <Widget>[
-      FlatButton(
+      TextButton(
         child: Text(btn),
         onPressed: () => Navigator.of(context).pop(1),
       ),
     ],
   );
 
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        // appBarのサイズを0にし、バーを消す
-        preferredSize: Size.fromHeight(0),
-        child: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
+  /**
+   * 画像表示付きのダイアログを描画
+   */
+  Widget _buildImageDialog(String imgpath, String message, String btn, String linkbtn, String linkurl) => AlertDialog(
+    titlePadding: EdgeInsets.zero,
+    title : Image.network(
+      imgpath,
+      height: 300,  //写真の高さ指定
+      fit: BoxFit.cover,
+    ),
+    content: Text(message
+        , style: TextStyle(fontSize: 14, color: _unselectedItemColor)),
+    actions: <Widget>[
+      TextButton(
+        child: Text(linkbtn),
+        onPressed: () {
+          _webViewController.loadRequest(Uri.parse(linkurl));
+          Navigator.of(context).pop(1);
+        },
       ),
-      body: Stack(
-        children: <Widget>[
-          WebView(
-            initialUrl: initialUrl +'?nid='+newsId,
-            // jsを有効化
-            javascriptMode: JavascriptMode.unrestricted,
-            // controllerを登録
-            onWebViewCreated: (WebViewController webViewController) {
-              _webViewController = webViewController;
-              print('created');
-            },
-            // リソースの読み込みエラー
-            onWebResourceError: (error) async {
-              _webViewController.loadUrl(Uri.dataFromString(
-                await rootBundle.loadString('assets/html/error.html'),
-                mimeType: 'text/html',
-                encoding: Encoding.getByName('utf-8')
-              ).toString());
-            },
-            navigationDelegate: (request) async {
-              // 初期URLやiFlameのURL、CSSのlink relの要素を除外する
-              if ((!request.isForMainFrame) || (initialUrl == request.url)) {
-                return NavigationDecision.navigate;
-              }
-              // ブラウザで開くリンクの判別
-              final uri = Uri.parse(request.url);
-              if(_debug) print(uri.path);
-              if(uri.path == "/push_settings"){
-                // アプリ設定画面へ移動
-                openAppSettings();
-                return NavigationDecision.prevent;
-              }
-              else if(uri.path.contains('share')) {
-                // 共有処理
-
-                // URLを正規の形に変更する
-                String shareUrl = uri.toString().replaceAll('cecile-dev.prm.bz/share', 'www.cecile.co.jp');
-                await Share.share(shareUrl);
-
-                return NavigationDecision.prevent;
-              }
-              else if(uri.path.contains('history_find')) {
-                // 過去の写真での再検索
-
-                // ファイルパスの生成
-                final userDirectory = await getApplicationDocumentsDirectory();
-                String imgFile = userDirectory.path + '/' + uri.path.split('/').last;
-
-                // 検索中画面の表示
-                await _onFindingDisplay();
-
-                // 画像検索処理
-                _onSimilar(imgFile, true);
-                return NavigationDecision.prevent;
-              }
-              else if(uri.path == "/history") {
-
-                // 検索履歴
-                try{
-                  // 撮影履歴ページを表示
-                  _webViewController.loadUrl(Uri.dataFromString(
-                    await _onHistoryList(),
-                    mimeType: 'text/html',
-                    encoding: Encoding.getByName('utf-8')
-                  ).toString());
-                } catch (err) {
-                  // ページ表示にエラーが発生したので、エラーメッセージを表示し、カタログ画像検索のメイン画面に遷移する
-                  _onWebPageByErrMsg("検索履歴情報の取得時にエラーが発生しました。\nカタログ画像検索画面から再度処理を行ってください。", 2);
-                }
-                return NavigationDecision.prevent;
-
-              }
-              else if(uri.path == "/gallery"){
-                // カメラを起動
-                final _picker = ImagePicker();
-                // ImageSource.camera / ImageSource.gallery
-                final _pickedFile = await _picker.pickImage(source: ImageSource.camera, maxHeight: 640, maxWidth: 480, imageQuality: 80);
-                final path = _pickedFile!.path;
-                final ext = path.split('.').last;
-                if(path != '') {
-                  // 画像データの選択があれば処理を行う
-
-                  // 画像データが指定数以上登録されている場合は、古い順に削除する
-                  String deletePath = '';
-                  int fileCnt = 0;
-                  final userDirectory = await getApplicationDocumentsDirectory();
-                  List<FileSystemEntity> files = userDirectory.listSync(recursive: true,followLinks: false);
-                  for (var file in files) {
-                    if(file.path.contains('jpg')) {
-                      if(deletePath == '') deletePath = file.path;
-                      fileCnt++;
-                    }
-                  }
-                  // 保存画像が指定数以上なら、古いデータを削除する
-                  if(fileCnt >= _saveImageMax) {
-                    final dir = Directory(deletePath);
-                    dir.deleteSync(recursive: true);
-                  }
-                  // 撮影した画像をユーザー領域へコピーする
-                  String tmpPath = (await getApplicationDocumentsDirectory()).path + '/' + DateFormat('yyyyMMddHHmmss').format(DateTime.now()) + '.' + ext;
-                  File(path).copy(tmpPath);
-                  if(_debug) print(tmpPath);
-
-                  // 検索中画面の表示
-                  await _onFindingDisplay();
-
-                  // 画像検索処理
-                  _onSimilar(path, false);
-                }
-                return NavigationDecision.prevent;
-              }
-              else if(uri.path == "/data_reset"){
-                // アプリ内のデータをリセット
-                // 削除確認ダイアログを表示
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title :Text('データ削除確認'),
-                    content: Text('アプリ内で保持しているデータを削除してもよろしいですか？'
-                      , style: TextStyle(fontSize: 14, color: _unselectedItemColor)),
-                    actions: <Widget>[
-                      FlatButton(
-                        child: Text('キャンセル'),
-                        onPressed: () => Navigator.of(context).pop(1),
-                      ),
-                      FlatButton(
-                        child: Text('削除'),
-                        onPressed: () async {
-                          Navigator.of(context).pop(1);
-                          // WebViewのCookieを削除
-                          await CookieManager().clearCookies();
-                          // キャッシュデータの削除
-                          await _webViewController.clearCache();
-                          // 画像検索履歴データの削除
-                          final userDirectory = await getApplicationDocumentsDirectory();
-                          List<FileSystemEntity> files = userDirectory.listSync(recursive: true,followLinks: false);
-                          for (var file in files) {
-                            if(file.path.contains('jpg')) {
-                              Directory(file.path).deleteSync(recursive: true);
-                            }
-                          }
-                          // 完了メッセージを表示
-                          showDialog(
-                            context: context,
-                            builder: (_) => _buildDialog(
-                              '削除完了', 'カタログ画像検索、デジタルカタログに関連するデータを削除しました。', 'OK'
-                            )
-                          );
-                        },
-                      ),
-                    ],
-                  )
-                );
-                return NavigationDecision.prevent;
-
-              }
-              else if(uri.path == "/firebase") {
-                // プッシュ通知端末登録
-
-                // プッシュ通知のトークンを取得する
-                _onRequestPermissions();
-
-                return NavigationDecision.prevent;
-              }
-              else if(uri.path == "/cache_reset") {
-                // WebViewのキャッシュを削除(Androidのみ)
-
-                // キャッシュクリア確認ダイアログを表示
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title :Text('キャッシュ削除確認'),
-                    content: Text('キャッシュデータを削除してもよろしいですか？'
-                      , style: TextStyle(fontSize: 14, color: _unselectedItemColor)),
-                    actions: <Widget>[
-                      FlatButton(
-                        child: Text('キャンセル'),
-                        onPressed: () => Navigator.of(context).pop(1),
-                      ),
-                      FlatButton(
-                        child: Text('削除'),
-                        onPressed: () async {
-                          Navigator.of(context).pop(1);
-                          // キャッシュデータの削除
-                          await _webViewController.clearCache();
-                          // 完了メッセージを表示
-                          showDialog(
-                            context: context,
-                            builder: (_) => _buildDialog(
-                              'クリア完了', 'アプリ内のキャッシュデータの削除が正常に完了しました。', 'OK'
-                            )
-                          );
-                        },
-                      ),
-                    ],
-                  )
-                );
-                return NavigationDecision.prevent;
-              }
-              else if (browserLinkList.indexOf(uri.host) < 0) {
-                if (await canLaunch(request.url)) {
-                  // 外部ブラウザで遷移
-                  await launch(
-                    request.url,
-                    forceSafariVC: false,
-                  );
-                }
-                // 何もしない
-                return NavigationDecision.prevent;
-              }
-              else if (uri.path == "/exit") {
-                _isBar = true;
-                _isActive = true;
-                _onItemTapped(_selectedIndex);
-                _isActive = false;
-                // 何もしない
-                return NavigationDecision.prevent;
-              }
-              // WebView内で遷移
-              if(uri.path == "/settings"){
-                _isBar = false;
-                _isActive = true;
-                _onItemTapped(_selectedIndex);
-                _webViewController.loadUrl(_urlList[4]);
-                _isActive = false;
-              }
-              return NavigationDecision.navigate;
-            },
-          ),
-          // ページ読み込み中の時はIndicatorを出す
-          _isLoading ? Center( child: CircularProgressIndicator())
-            : Stack(),
-        ]
+      TextButton(
+        child: Text(btn),
+        onPressed: () => Navigator.of(context).pop(1),
       ),
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.only(top: 0, bottom: 0),
-        child: _isBar
-            ?BottomNavigationBar(
-          // selectedFontSizeの値を0にする事でスペースが消える
-          selectedFontSize: 0,
-          items: [
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.home, 'ホーム', 12, 0),
-              title: SizedBox.shrink(),
-            ),
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.menu_book, 'デジタルカタログ', 12, 1),
-              title: SizedBox.shrink(),
-            ),
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.camera_enhance, 'カタログ画像検索', 12, 2),
-              title: SizedBox.shrink(),
-            ),
-            BottomNavigationBarItem(
-              icon: _buildIcon(Icons.verified, '新着情報', 12, 3),
-              title: SizedBox.shrink(),
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: _selectedItemColor,
-          type: BottomNavigationBarType.fixed,
-        ):Container(
-          color: Colors.white,
-          width: MediaQuery.of(context).size.width,
-          height: 0,
-        ),
-      )
+    ],
+  );
+
+  /**
+   * ブラウザの戻る処理
+   */
+  Future<bool> _willPopCallback() async {
+    if(_history_cnt>0){
+      if(_webviewIndex==1) _webViewController.goBack();
+      else _webViewLabController.goBack();
+      _history_cnt--;
+    }
+    return false;
+  }
+
+  // 戻るボタンのウィジェット
+  Widget backButton(WebViewController controller) {
+    return IconButton(
+      iconSize: 20.0,
+      icon: const Icon(Icons.arrow_back_ios),
+      onPressed: () async {
+        setState(() {
+          _webviewIndex = 0;
+          _showAppBar = false;
+        });
+      },
     );
   }
 
+  /**
+   * 下部メニューバーの描画処理
+   */
+  Widget build(BuildContext context) {
+    final _webViewWidget = [
+      WebViewWidget(controller: _webViewLabController),
+      WebViewWidget(controller: _webViewController),
+    ];
+    return WillPopScope(
+        onWillPop: _willPopCallback,
+        child: Scaffold(
+            backgroundColor: Colors.white,
+            appBar: _showAppBar ? PreferredSize(
+              // appBarにセシラボに戻るバーを表示
+              preferredSize: Size.fromHeight(40.0),
+              child: AppBar(
+                elevation: 0,
+                centerTitle: false,
+                title: const Text('セシラボへ戻る', style: TextStyle(fontSize: 14, color: Colors.blueGrey)),
+                leading: Padding(
+                  padding: EdgeInsets.only(left: 10.0, right: 0), // 左側に 10.0 のパディングを追加
+                  child: backButton(_webViewController), // 戻るのアイコンボタン
+                ),
+                leadingWidth: 35.0,
+                // leading: backButton(_webViewController),
+              ),
+            ): PreferredSize(
+              // appBarのサイズを0にし、バーを消す
+              preferredSize: Size.fromHeight(0),
+              child: AppBar(
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+              ),
+            ),
+            body: IndexedStack(
+              index: _webviewIndex,
+              children: _webViewWidget,
+            ),
+            bottomNavigationBar: Container(
+                margin: EdgeInsets.only(top: 0, bottom: 0),
+                child: _isBar
+                    ? BottomNavigationBar(
+                  // selectedFontSizeの値を0にする事でスペースが消える
+                  selectedFontSize: 0,
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: _buildIcon(
+                        IconData(
+                          Symbols.demography.codePoint,
+                          fontFamily: 'MaterialSymbolsOutlined',
+                          fontPackage: 'material_symbols_icons',
+                        ), 'セシルなう', 12, 0),
+                      label: '',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: _buildIcon(
+                        IconData(
+                          Symbols.tooltip.codePoint,
+                          fontFamily: 'MaterialSymbolsOutlined',
+                          fontPackage: 'material_symbols_icons',
+                        ), 'アシスタント', 12, 1),
+                      label: '',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: _buildIcon(
+                        IconData(
+                          Symbols.tab_search.codePoint,
+                          fontFamily: 'MaterialSymbolsOutlined',
+                          fontPackage: 'material_symbols_icons',
+                        ), 'カタログ', 12, 2),
+                      label: '',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: _buildIcon(IconData(
+                        Symbols.update.codePoint,
+                        fontFamily: 'MaterialSymbolsOutlined',
+                        fontPackage: 'material_symbols_icons',
+                      ), '更新情報', 12, 3),
+                      label: '',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: _buildIcon(IconData(
+                        Symbols.book_5.codePoint,
+                        fontFamily: 'MaterialSymbolsOutlined',
+                        fontPackage: 'material_symbols_icons',
+                      ), '使い方', 12, 4),
+                      label: '',
+                    ),
+                  ],
+                  currentIndex: _selectedIndex,
+                  selectedItemColor: _selectedItemColor,
+                  type: BottomNavigationBarType.fixed,
+                ) : Container(
+                  color: Colors.white,
+                  width: MediaQuery
+                    .of(context)
+                    .size
+                    .width,
+                  height: 0,
+                )
+            )
+        )
+    );
+  }
 }
