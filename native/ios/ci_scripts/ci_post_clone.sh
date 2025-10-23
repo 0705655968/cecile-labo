@@ -61,6 +61,6 @@ pod deintegrate
 rm Podfile.lock
 
 # Install CocoaPods dependencies.
-cd pod install
+pod install
 
 exit 0
