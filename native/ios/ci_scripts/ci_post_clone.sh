@@ -42,6 +42,6 @@ brew install cocoapods
 echo "cd ios && pod install..."
 
 # Install CocoaPods dependencies.
-cd native/ios && pod install # run `pod install` in the `ios` directory.
+cd ios && pod install # run `pod install` in the `ios` directory.
  
 exit 0
