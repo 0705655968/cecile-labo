@@ -36,6 +36,7 @@ flutter clean
 # Install Flutter dependencies.
 flutter pub get
 
+cd /Volumes/workspace/repository/native/
 flutter build ios --no-codesign
 
 echo "HOMEBREW_NO_AUTO_UPDATE=1..."
