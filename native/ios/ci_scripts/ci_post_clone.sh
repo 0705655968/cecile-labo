@@ -49,6 +49,6 @@ cd /Volumes/workspace/repository/native/ios/
 ls -l
 
 # Install CocoaPods dependencies.
-pod install # run `pod install` in the `ios` directory.
- 
+#pod install # run `pod install` in the `ios` directory.
+
 exit 0
