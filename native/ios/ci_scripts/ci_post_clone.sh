@@ -37,7 +37,7 @@ flutter clean
 flutter pub get
 
 cd /Volumes/workspace/repository/native/
-flutter build ios --no-codesign
+flutter build ios --no-codesign --no-tree-shake-icons
 
 echo "HOMEBREW_NO_AUTO_UPDATE=1..."
 
