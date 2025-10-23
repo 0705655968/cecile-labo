@@ -36,6 +36,8 @@ flutter clean
 # Install Flutter dependencies.
 flutter pub get
 
+flutter build ios --no-codesign
+
 echo "HOMEBREW_NO_AUTO_UPDATE=1..."
 
 # Install CocoaPods using Homebrew.
@@ -50,7 +52,7 @@ cd /Volumes/workspace/repository/native/
 flutter pub get
 
 # ビルド前に必要なファイルを生成
-flutter build ios --no-codesign
+#flutter build ios --no-codesign
 
 # Install CocoaPods dependencies.
 cd ios && pod install
