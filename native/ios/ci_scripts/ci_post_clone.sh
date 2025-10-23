@@ -23,6 +23,10 @@ flutter precache --ios
 
 echo "flutter pub get..."
 
+echo "$HOME/flutter/bin"
+
+ls
+
 # Install Flutter dependencies.
 flutter pub get
 
