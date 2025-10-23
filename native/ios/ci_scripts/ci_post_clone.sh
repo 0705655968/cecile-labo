@@ -37,7 +37,8 @@ flutter clean
 flutter pub get
 
 # エラーが出たのでコメントアウト
-#cd /Volumes/workspace/repository/native/
+cd /Volumes/workspace/repository/native/
+rm -rf ios/Pods/ ios/Podfile.lock
 #flutter build ios --no-codesign --no-tree-shake-icons
 
 echo "HOMEBREW_NO_AUTO_UPDATE=1..."
@@ -58,9 +59,8 @@ flutter pub get
 
 cd /Volumes/workspace/repository/native/ios/
 pod deintegrate
-rm Podfile.lock
 
 # Install CocoaPods dependencies.
-pod install
+pod install--project-directory=ios
 
 exit 0
