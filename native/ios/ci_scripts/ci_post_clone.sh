@@ -1,4 +1,8 @@
-#!/bin/sh
+#!/bin/bash
+
+# ここに既存のスクリプト内容が続きます
+echo "Starting post-clone operations..."
+# ...
 
 # Fail this script if any subcommand fails.
 set -e
