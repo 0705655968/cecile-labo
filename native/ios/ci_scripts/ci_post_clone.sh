@@ -61,6 +61,6 @@ cd /Volumes/workspace/repository/native/ios/
 pod deintegrate
 
 # Install CocoaPods dependencies.
-pod install# --project-directory=ios
+pod install
 
 exit 0
