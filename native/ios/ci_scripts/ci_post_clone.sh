@@ -44,8 +44,13 @@ brew install cocoapods
 
 echo "cd ios && pod install..."
 
+# 前にflutter pub getを実行しているが、iosの親ディレクトリで
+# サイド処理しないと、Generated.xcconfigを生成しないらしいので
 cd /Volumes/workspace/repository/native/
 flutter pub get
+
+# ビルド前に必要なファイルを生成
+flutter build ios --no-codesign
 
 # Install CocoaPods dependencies.
 cd ios && pod install
