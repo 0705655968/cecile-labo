@@ -7,21 +7,6 @@ echo "Starting post-clone operations..."
 # Fail this script if any subcommand fails.
 set -e
 
-# このスクリプトは、リポジトリがクローンされた直後に実行されます。
-# Xcodeプロジェクトファイル（.xcodeproj）のパスを設定します
-PROJECT_FILE="./ios/Pods/Pods.xcodeproj"
-TARGET_NAME="firebase_messaging"
-SETTING_NAME="CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES"
-SETTING_VALUE="YES"
-
-# Firebase Messaging ターゲットのビルド設定を強制的に YES に上書きする
-echo "Setting '$SETTING_NAME' to '$SETTING_VALUE' for target '$TARGET_NAME' in '$PROJECT_FILE'"
-
-# 'Pods' プロジェクト内の 'firebase_messaging' ターゲットに対して設定を適用
-# Debug (デバッグ) および Release (リリース) の両方の構成に適用
-/usr/bin/xcrun xcodebuild -project "$PROJECT_FILE" -target "$TARGET_NAME" -configuration Debug       -type buildsetting ONLY_ACTIVE_ARCH=NO GCC_PRECOMPILE_PREFIX_HEADER=NO -json | /usr/bin/plutil -convert json -r -o /dev/stdout - | grep -q '"'"$SETTING_NAME"'"' || /usr/bin/xcrun xcodebuild -project "$PROJECT_FILE" -target "$TARGET_NAME" -configuration Debug       -type buildsetting ONLY_ACTIVE_ARCH=NO GCC_PRECOMPILE_PREFIX_HEADER=NO "$SETTING_NAME"="$SETTING_VALUE"
-/usr/bin/xcrun xcodebuild -project "$PROJECT_FILE" -target "$TARGET_NAME" -configuration Release      -type buildsetting ONLY_ACTIVE_ARCH=NO GCC_PRECOMPILE_PREFIX_HEADER=NO -json | /usr/bin/plutil -convert json -r -o /dev/stdout - | grep -q '"'"$SETTING_NAME"'"' || /usr/bin/xcrun xcodebuild -project "$PROJECT_FILE" -target "$TARGET_NAME" -configuration Release      -type buildsetting ONLY_ACTIVE_ARCH=NO GCC_PRECOMPILE_PREFIX_HEADER=NO "$SETTING_NAME"="$SETTING_VALUE"
-
 # The default execution directory of this script is the ci_scripts directory.
 cd $CI_PRIMARY_REPOSITORY_PATH # change working directory to the root of your cloned repo.
 
