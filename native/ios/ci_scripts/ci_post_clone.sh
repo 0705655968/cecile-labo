@@ -36,8 +36,9 @@ flutter clean
 # Install Flutter dependencies.
 flutter pub get
 
-cd /Volumes/workspace/repository/native/
-flutter build ios --no-codesign --no-tree-shake-icons
+# エラーが出たのでコメントアウト
+#cd /Volumes/workspace/repository/native/
+#flutter build ios --no-codesign --no-tree-shake-icons
 
 echo "HOMEBREW_NO_AUTO_UPDATE=1..."
 
