@@ -30,6 +30,9 @@ flutter --version
 cd "$HOME/flutter/bin"
 ls -l
 
+echo "flutter clean..."
+flutter clean
+
 # Install Flutter dependencies.
 flutter pub get
 
