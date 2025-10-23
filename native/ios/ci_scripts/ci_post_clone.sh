@@ -56,7 +56,11 @@ flutter pub get
 # ビルド前に必要なファイルを生成
 #flutter build ios --no-codesign
 
+cd /Volumes/workspace/repository/native/ios/
+pod deintegrate
+rm Podfile.lock
+
 # Install CocoaPods dependencies.
-cd ios && pod install
+cd pod install
 
 exit 0
