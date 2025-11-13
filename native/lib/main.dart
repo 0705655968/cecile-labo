@@ -289,7 +289,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                 _onRequestSSI();
                 return NavigationDecision.prevent;
               }
-              else if (uri.path == "/app_notification") {
+              else if (uri.path == "/app_token") {
                 // プッシュ通知端末登録
                 // プッシュ通知のトークンを取得する
                 _history_cnt = 0;
