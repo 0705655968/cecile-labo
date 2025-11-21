@@ -81,6 +81,23 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
   importance: Importance.high,
 );
 
+// Cookieを設定する関数
+Future<void> setCustRegistFlagToOne(String domain) async {
+  // 1. Cookieオブジェクトを作成（このパッケージ固有の 'Cookie' クラスを使用）
+  final newCookie = Cookie('custregist-flg', '1')
+    ..domain = domain // 必須：Cookieを適用するドメイン (例: 'example.com')
+    ..expires = DateTime.now().add(const Duration(days: 365)) // 有効期限を設定
+    ..httpOnly = false; // 必要に応じて設定
+
+  // 2. setCookiesメソッドにリストとして渡して設定/上書き
+  try {
+    await _cookieManager.setCookies([newCookie]);
+    debugPrint('Cookie "custregist-flg" was successfully set to "1" for domain $domain.');
+  } catch (e) {
+    debugPrint('Failed to set cookie: $e');
+  }
+}
+
 //void main() {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -121,6 +138,8 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   final app_param = 'utm_source=cecile_dinos_apps&utm_medium=app&utm_campaign=app_230508';
   // アシスタント画面のURL
   final String actualBaseUrl = 'https://cecile.yamateras.jp/';
+  // ブラウザのユーザーエージェント
+  final String uaApp = 'CecileLaboApp/1.0 (Mobile; WebView)';
 
   int _selectedIndex = 0;
   int _webviewIndex = 0;
@@ -134,6 +153,9 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   // アシスタント処理のHTMLソースを管理する変数
   // アプリを閉じるまで、アシスタントの表示を保持する仕様の為
   String assistant_src = '';
+  // ホーム処理のHTMLソースを管理する変数
+  // アプリを閉じるまで、ホームの表示を保持する仕様の為
+  String home_src = '';
   late Timer _timer;
 
   bool _sendToken = false;
@@ -147,13 +169,13 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   final _unselectedBgColor = Colors.white;
 
   // 初期URL
-  final String initialUrl = 'https://cecile.yamateras.jp/';
+  final String initialUrl = 'https://cecile.yamateras.jp/visual';
   // メニューURL
   List<String> _urlList = [
-    'https://cecile.yamateras.jp/',
-    'https://cecile.yamateras.jp/assistant',
+    'https://cecile.yamateras.jp/visual',
     'https://cecile.yamateras.jp/catalog',
-    'https://cecile.yamateras.jp/update',
+    'https://cecile.yamateras.jp/assistant',
+    'https://cecile.yamateras.jp/',
     'https://cecile.yamateras.jp/guide',
     'https://cecile.yamateras.jp/receipter',
     'https://cecile.yamateras.jp/receipt?code=',
@@ -173,6 +195,9 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     initWebViewState();
     // プラットフォームの初期化
     initPlatformState();
+
+    // iOSの場合、セシールサイトでエラー項目が表示されるので、Cookieをセットして回避する
+    setCustRegistFlagToOne('cecile.co.jp');
 
     // 今回表示する、おすすめURLを取得する
     _onRecommendUri();
@@ -219,6 +244,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
      */
     _webViewLabController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent(uaApp)
       ..setNavigationDelegate(
           NavigationDelegate(
             onNavigationRequest: (NavigationRequest request) {
@@ -271,6 +297,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                           await _webViewController.clearLocalStorage();
                           await _webViewLabController.clearLocalStorage();
                           assistant_src = "";
+                          home_src = "";
                           // 完了メッセージを表示
                           showDialog(
                             context: context,
@@ -331,6 +358,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                           await _webViewController.clearCache();
                           await _webViewLabController.clearCache();
                           assistant_src = "";
+                          home_src = "";
                           // 完了メッセージを表示
                           showDialog(
                             context: context,
@@ -413,6 +441,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
      */
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent(uaApp)
       ..setNavigationDelegate(
         NavigationDelegate(
           onWebResourceError: (WebResourceError error) {
@@ -676,9 +705,9 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     _history_cnt = -1;
     setState(() {
       // アシスタントモードの場合、HTMLソースを保持する
-      if(_selectedIndex == 1) {
+      if(_selectedIndex == 2) {
         // ページ読み込み完了時にHTMLを取得
-        _getHtmlSource();
+        _getHtmlSource(_selectedIndex);
       }
       // 表示するページのURL
       _selectedIndex = index;
@@ -726,7 +755,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   /**
    * WebViewからHTMLソースを取得する
    */
-  Future<void> _getHtmlSource() async {
+  Future<void> _getHtmlSource(int type) async {
     try{
       // JavaScriptを実行してHTML全体を取得
       // 'document.documentElement.outerHTML'はページ全体のHTML要素を文字列として返します
@@ -734,12 +763,14 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
           "document.documentElement.outerHTML"
       ) as String;
       setState(() {
-        assistant_src = html.isNotEmpty ? jsonDecode(html).toString() : "";
+        if(type==0) home_src = html.isNotEmpty ? jsonDecode(html).toString() : "";
+        else assistant_src = html.isNotEmpty ? jsonDecode(html).toString() : "";
       });
     }
     catch(e){
       setState((){
-        assistant_src = "";
+        if(type==0) home_src = "";
+        else assistant_src = "";
       });
     }
   }
@@ -965,42 +996,42 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                   items: [
                     BottomNavigationBarItem(
                       icon: _buildIcon(
-                        IconData(
-                          Symbols.demography.codePoint,
-                          fontFamily: 'MaterialSymbolsOutlined',
-                          fontPackage: 'material_symbols_icons',
-                        ), 'セシルなう', 12, 0),
+                          IconData(
+                            Symbols.home.codePoint,
+                            fontFamily: 'MaterialSymbolsOutlined',
+                            fontPackage: 'material_symbols_icons',
+                          ), 'ホーム', 12, 0),
                       label: '',
                     ),
                     BottomNavigationBarItem(
                       icon: _buildIcon(
-                        IconData(
-                          Symbols.tooltip.codePoint,
-                          fontFamily: 'MaterialSymbolsOutlined',
-                          fontPackage: 'material_symbols_icons',
-                        ), 'アシスタント', 12, 1),
+                          IconData(
+                            Symbols.book_4.codePoint,
+                            fontFamily: 'MaterialSymbolsOutlined',
+                            fontPackage: 'material_symbols_icons',
+                          ), 'カタログ', 12, 1),
                       label: '',
                     ),
                     BottomNavigationBarItem(
                       icon: _buildIcon(
-                        IconData(
-                          Symbols.tab_search.codePoint,
-                          fontFamily: 'MaterialSymbolsOutlined',
-                          fontPackage: 'material_symbols_icons',
-                        ), 'カタログ', 12, 2),
+                          IconData(
+                            Symbols.quick_phrases.codePoint,
+                            fontFamily: 'MaterialSymbolsOutlined',
+                            fontPackage: 'material_symbols_icons',
+                          ), 'アシスタント', 12, 2),
                       label: '',
                     ),
                     BottomNavigationBarItem(
                       icon: _buildIcon(IconData(
-                        Symbols.update.codePoint,
+                        Symbols.chart_data.codePoint,
                         fontFamily: 'MaterialSymbolsOutlined',
                         fontPackage: 'material_symbols_icons',
-                      ), '更新情報', 12, 3),
+                      ), 'おすすめ', 12, 3),
                       label: '',
                     ),
                     BottomNavigationBarItem(
                       icon: _buildIcon(IconData(
-                        Symbols.book_5.codePoint,
+                        Symbols.article_person.codePoint,
                         fontFamily: 'MaterialSymbolsOutlined',
                         fontPackage: 'material_symbols_icons',
                       ), '使い方', 12, 4),
