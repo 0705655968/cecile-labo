@@ -135,7 +135,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   // アプリ設定画面のアプリバージョンに表示される値
   final String _appVer = '1.0.0';
   // セシールサイトへのリンク時に、どこからのアクセスかを識別するためのパラーメータ
-  final app_param = 'utm_source=cecile_dinos_apps&utm_medium=app&utm_campaign=app_230508';
+  final app_param = 'utm_source=cecile_labo&utm_medium=app_labo&utm_campaign=app_251101';
   // アシスタント画面のURL
   final String actualBaseUrl = 'https://cecile.yamateras.jp/';
   // ブラウザのユーザーエージェント
@@ -380,7 +380,8 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                   _webviewIndex = 1;
                   _history_cnt = 0;
                   _showAppBar = true;
-                  _webViewController.loadRequest(Uri.parse(request.url));
+                  if(request.url.contains('/search-results/?')) _webViewController.loadRequest(Uri.parse(request.url+'&'+app_param));
+                  else _webViewController.loadRequest(Uri.parse(request.url+'?'+app_param));
                 });
                 return NavigationDecision.prevent;
               }
