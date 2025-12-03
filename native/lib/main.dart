@@ -149,6 +149,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   bool _isActive = false;
   bool _isBar = true;
   bool _showAppBar = false;
+  bool _inactive = false;
   String _initapp = '0';
   // アシスタント処理のHTMLソースを管理する変数
   // アプリを閉じるまで、アシスタントの表示を保持する仕様の為
@@ -163,9 +164,9 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   bool _isSsi_Token = false;
 
   // 色関連の固定値を管理する変数
-  final _selectedItemColor = Colors.white;
+  final _selectedItemColor = Color.fromRGBO(209, 63, 125, 1.0);//Colors.white;
   final _unselectedItemColor = Color.fromRGBO(99, 99, 99, 1.0);
-  final _selectedBgColor = Color.fromRGBO(156, 20, 74, 1.0);
+  final _selectedBgColor = Colors.white;//Color.fromRGBO(156, 20, 74, 1.0);
   final _unselectedBgColor = Colors.white;
 
   // 初期URL
@@ -380,6 +381,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                   _webviewIndex = 1;
                   _history_cnt = 0;
                   _showAppBar = true;
+                  _inactive = true;
                   if(request.url.contains('/search-results/?')) _webViewController.loadRequest(Uri.parse(request.url+'&'+app_param));
                   else _webViewController.loadRequest(Uri.parse(request.url+'?'+app_param));
                 });
@@ -731,8 +733,10 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
         _webviewIndex = 0;
         _showAppBar = false;
 
-        if (_webviewIndex == 0) _webViewLabController.loadRequest(
-            Uri.parse(_urlList[index]));
+        if (_webviewIndex == 0){
+          _webViewLabController.loadRequest(Uri.parse(_urlList[index]));
+          _inactive = false;
+        }
         /*
         else if(index==3){
           // 暗号化客番付でお知らせ配信履歴画面を開く
@@ -859,7 +863,13 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
    * 下部メニューの文字色を動的に変更する
    */
   Color _getItemColor(int index) =>
-      _selectedIndex == index ? _selectedItemColor : _unselectedItemColor;
+      _selectedIndex == index && _inactive == false ? _selectedItemColor : _unselectedItemColor;
+
+  /**
+   * 下部メニューのアイコンのFILLを動的に変更する
+   */
+  double _getIconFill(int index) =>
+      _selectedIndex == index && _inactive == false ? 1.0 : 0;
 
   /**
    * 下部メニューのアイコンに背景を設定する
@@ -873,7 +883,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(iconData, size: 28.0, color: _getItemColor(index)),
+            Icon(iconData, size: 28.0, fill: _getIconFill(index), color: _getItemColor(index)),
             Text(text, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 9,height: 1.1, color: _getItemColor(index))),
           ],
         ),
@@ -945,9 +955,26 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
         setState(() {
           _webviewIndex = 0;
           _showAppBar = false;
+          _inactive = false;
         });
       },
     );
+  }
+
+  // WebViewを一つ前に戻す処理
+  Future<void> _goBackInWebView() async {
+    // 戻る履歴があるか確認してからgoBack()を呼び出すのが一般的です
+    if (await _webViewController.canGoBack()) {
+      await _webViewController.goBack();
+    }
+    else{
+      // 戻る履歴がない場合の処理（例：ログ出力、Snackbar表示など）
+      setState(() {
+        _webviewIndex = 0;
+        _showAppBar = false;
+        _inactive = false;
+      });
+    }
   }
 
   /**
@@ -968,7 +995,16 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
               child: AppBar(
                 elevation: 0,
                 centerTitle: false,
-                title: const Text('セシラボへ戻る', style: TextStyle(fontSize: 14, color: Colors.blueGrey)),
+                //title: const Text('セシラボへ戻る', style: TextStyle(fontSize: 14, color: Colors.blueGrey)),
+                title: InkWell(
+                  // タップイベントを処理
+                  onTap: _goBackInWebView,
+                  // titleとして表示するウィジェット
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0), // タップ領域を確保
+                    child: Text('前の画面へ戻る', style: TextStyle(fontSize: 14, color: Colors.black)),
+                  ),
+                ),
                 leading: Padding(
                   padding: EdgeInsets.only(left: 10.0, right: 0), // 左側に 10.0 のパディングを追加
                   child: backButton(_webViewController), // 戻るのアイコンボタン
@@ -1016,7 +1052,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                     BottomNavigationBarItem(
                       icon: _buildIcon(
                           IconData(
-                            Symbols.quick_phrases.codePoint,
+                            Symbols.forum.codePoint,
                             fontFamily: 'MaterialSymbolsOutlined',
                             fontPackage: 'material_symbols_icons',
                           ), 'アシスタント', 12, 2),
