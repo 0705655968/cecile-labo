@@ -151,6 +151,10 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   bool _showAppBar = false;
   bool _inactive = false;
   String _initapp = '0';
+
+  // 最終的なユーザーエージェント
+  String _customUA = '';
+
   // アシスタント処理のHTMLソースを管理する変数
   // アプリを閉じるまで、アシスタントの表示を保持する仕様の為
   String assistant_src = '';
@@ -245,7 +249,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
      */
     _webViewLabController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setUserAgent(uaApp)
+      ..setUserAgent(_customUA)
       ..setNavigationDelegate(
           NavigationDelegate(
             onNavigationRequest: (NavigationRequest request) {
@@ -444,7 +448,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
      */
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setUserAgent(uaApp)
+      ..setUserAgent(_customUA)
       ..setNavigationDelegate(
         NavigationDelegate(
           onWebResourceError: (WebResourceError error) {
@@ -586,6 +590,11 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                 if (closebtn != '') await _webViewController.runJavaScript('document.querySelector(".button-c.-close").style.display="none";');
               }
               catch(err){}
+              // アプリからのアクセスだと判定しているCookieの値をセット
+              try {
+                await _webViewController.runJavaScript('document.cookie="custregist-flg=1";');
+              }
+              catch(err){}
               try {
                 // アプリバナーを消す
                 final appbnr = await _webViewController.runJavaScriptReturningResult('document.querySelector(".smartbanner").innerHTML;');
@@ -647,6 +656,14 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     _firebaseMessaging.getToken().then((token) async {
       token_id = "$token";
     });
+    /**
+     * ユーザーエージェントの生成
+     */
+    String? defaultUA = await _webViewController.getUserAgent();
+    String _customUA = "${defaultUA ?? ''} ${uaApp}";
+    await _webViewController.setUserAgent(_customUA);
+    await _webViewLabController.setUserAgent(_customUA);
+    
     if (!mounted) return;
     setState(() async{
       final logDirectory = await getApplicationDocumentsDirectory();
