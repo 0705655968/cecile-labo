@@ -386,8 +386,20 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                   _history_cnt = 0;
                   _showAppBar = true;
                   _inactive = true;
-                  if(request.url.contains('?')) _webViewController.loadRequest(Uri.parse(request.url+'&'+app_param));
-                  else _webViewController.loadRequest(Uri.parse(request.url+'?'+app_param));
+                  if(request.url.contains('/detail/')) {
+                    // 商品詳細ページなので、パラメータを付ける
+                    // デバッグ用
+                    //if(request.url.contains('?')) print(Uri.parse(request.url+'&'+app_param));
+                    //else print(Uri.parse(request.url+'?'+app_param));
+                    if (request.url.contains('?')) _webViewController.loadRequest(Uri.parse(request.url + '&' + app_param));
+                    else _webViewController.loadRequest(Uri.parse(request.url + '?' + app_param));
+                  }
+                  else{
+                    // 詳細ページ意外なので、パラメータを付けない
+                    // デバッグ用
+                    //print(Uri.parse(request.url));
+                    _webViewController.loadRequest(Uri.parse(request.url));
+                  }
                 });
                 return NavigationDecision.prevent;
               }
@@ -456,6 +468,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
           /**
            * セシールサイト内でのブラウジング中、パラメータを常時つける処理を追加
            */
+          /*
           onNavigationRequest: (NavigationRequest request) {
             if(request.url.contains('.cecile.co.jp')) {
               if(request.url.contains('?')) _webViewController.loadRequest(Uri.parse(request.url+'&'+app_param));
@@ -464,6 +477,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
             }
             return NavigationDecision.navigate;
           },
+          */
           onPageStarted: (String url) {
             setState(() {
               _isLoading = true;
@@ -991,6 +1005,13 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
 
   // WebViewを一つ前に戻す処理
   Future<void> _goBackInWebView() async {
+    // セシールサイトでの一つ前に戻るという処理を排除し、セシラボへ戻る処理に統一
+    setState(() {
+      _webviewIndex = 0;
+      _showAppBar = false;
+      _inactive = false;
+    });
+    /*
     // 戻る履歴があるか確認してからgoBack()を呼び出すのが一般的です
     if (await _webViewController.canGoBack()) {
       await _webViewController.goBack();
@@ -1003,6 +1024,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
         _inactive = false;
       });
     }
+    */
   }
 
   /**
