@@ -135,7 +135,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   // アプリ設定画面のアプリバージョンに表示される値
   final String _appVer = '1.0.0';
   // セシールサイトへのリンク時に、どこからのアクセスかを識別するためのパラーメータ
-  final app_param = 'utm_source=cecile_labo&utm_medium=app_labo&utm_campaign=app_251101';
+  final app_param = 'utm_source=cecile_labo&utm_medium=app_labo&utm_campaign=app_260109';
   // アシスタント画面のURL
   final String actualBaseUrl = 'https://cecile.yamateras.jp/';
   // ブラウザのユーザーエージェント
@@ -386,7 +386,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                   _history_cnt = 0;
                   _showAppBar = true;
                   _inactive = true;
-                  if(request.url.contains('/search-results/?')) _webViewController.loadRequest(Uri.parse(request.url+'&'+app_param));
+                  if(request.url.contains('?')) _webViewController.loadRequest(Uri.parse(request.url+'&'+app_param));
                   else _webViewController.loadRequest(Uri.parse(request.url+'?'+app_param));
                 });
                 return NavigationDecision.prevent;
@@ -452,6 +452,17 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
       ..setNavigationDelegate(
         NavigationDelegate(
           onWebResourceError: (WebResourceError error) {
+          },
+          /**
+           * セシールサイト内でのブラウジング中、パラメータを常時つける処理を追加
+           */
+          onNavigationRequest: (NavigationRequest request) {
+            if(request.url.contains('.cecile.co.jp')) {
+              if(request.url.contains('?')) _webViewController.loadRequest(Uri.parse(request.url+'&'+app_param));
+              else _webViewController.loadRequest(Uri.parse(request.url+'?'+app_param));
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
           },
           onPageStarted: (String url) {
             setState(() {
