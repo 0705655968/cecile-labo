@@ -144,6 +144,8 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   int _selectedIndex = 0;
   int _webviewIndex = 0;
   int _history_cnt = 0;
+  // 読み込み状況を保持（0-100）
+  int _loadingProgress = 0;
   bool _isLoading = false;
   bool _isPopup = false;
   bool _isActive = false;
@@ -180,7 +182,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     'https://cecile.yamateras.jp/visual',
     'https://cecile.yamateras.jp/catalog',
     'https://cecile.yamateras.jp/assistant',
-    'https://cecile.yamateras.jp/',
+//    'https://cecile.yamateras.jp/', // おすすめを停止したのでコメントアウト
     'https://cecile.yamateras.jp/guide',
     'https://cecile.yamateras.jp/receipter',
     'https://cecile.yamateras.jp/receipt?code=',
@@ -466,6 +468,14 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
           onWebResourceError: (WebResourceError error) {
           },
           /**
+           * プログレスバーの表示
+           */
+          onProgress: (int progress) {
+            setState(() {
+              _loadingProgress = progress; // 進捗を更新
+            });
+          },
+          /**
            * セシールサイト内でのブラウジング中、パラメータを常時つける処理を追加
            */
           /*
@@ -481,11 +491,13 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
           onPageStarted: (String url) {
             setState(() {
               _isLoading = true;
+              _loadingProgress = 0; // 読み込み開始時にリセット
             });
           },
           onPageFinished: (String url) async {
             setState(() {
               _isLoading = false;
+              _loadingProgress = 100; // 完了
             });
             _history_cnt++;
             var host = Uri.parse(url).host;
@@ -1070,9 +1082,33 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                 backgroundColor: Colors.transparent,
               ),
             ),
+            /* プログレスバーの追加前のコード
             body: IndexedStack(
               index: _webviewIndex,
               children: _webViewWidget,
+            ),
+            */
+            body: Stack(
+              children: [
+                // 1. WebView本体
+                IndexedStack(
+                  index: _webviewIndex,
+                  children: _webViewWidget,
+                ),
+                // 2. プログレスバー (読み込み中のみ表示)
+                if (_loadingProgress < 100)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: LinearProgressIndicator(
+                      value: _loadingProgress / 100.0,
+                      backgroundColor: Colors.transparent,
+                      color: _selectedItemColor,
+                      minHeight: 3,
+                    ),
+                  ),
+              ],
             ),
             bottomNavigationBar: Container(
                 margin: EdgeInsets.only(top: 0, bottom: 0),
@@ -1108,6 +1144,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                           ), 'アシスタント', 12, 2),
                       label: '',
                     ),
+                    /* おすすめメニューを一旦外すため
                     BottomNavigationBarItem(
                       icon: _buildIcon(IconData(
                         Symbols.chart_data.codePoint,
@@ -1116,6 +1153,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                       ), 'おすすめ', 12, 3),
                       label: '',
                     ),
+                    */
                     BottomNavigationBarItem(
                       icon: _buildIcon(IconData(
                         Symbols.article_person.codePoint,
