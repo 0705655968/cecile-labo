@@ -1159,7 +1159,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                         Symbols.article_person.codePoint,
                         fontFamily: 'MaterialSymbolsOutlined',
                         fontPackage: 'material_symbols_icons',
-                      ), '使い方', 12, 4),
+                      ), '使い方', 12, 3),
                       label: '',
                     ),
                   ],
