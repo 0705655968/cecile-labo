@@ -183,7 +183,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     'https://cecile.yamateras.jp/catalog',
     'https://cecile.yamateras.jp/assistant',
 //    'https://cecile.yamateras.jp/', // おすすめを停止したのでコメントアウト
-    'https://cecile.yamateras.jp/guide',
+    'https://cecile.yamateras.jp/survey',
     'https://cecile.yamateras.jp/receipter',
     'https://cecile.yamateras.jp/receipt?code=',
   ];
@@ -1159,7 +1159,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                         Symbols.article_person.codePoint,
                         fontFamily: 'MaterialSymbolsOutlined',
                         fontPackage: 'material_symbols_icons',
-                      ), '使い方', 12, 3),
+                      ), 'ご要望窓口', 12, 3),
                       label: '',
                     ),
                   ],
