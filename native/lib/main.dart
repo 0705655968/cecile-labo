@@ -1064,7 +1064,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                   // titleとして表示するウィジェット
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0), // タップ領域を確保
-                    child: Text('前の画面へ戻る', style: TextStyle(fontSize: 14, color: Colors.black)),
+                    child: Text('Cecile Laboアプリに戻る', style: TextStyle(fontSize: 14, color: Colors.black)),
                   ),
                 ),
                 leading: Padding(
