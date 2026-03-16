@@ -176,7 +176,8 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   final _unselectedBgColor = Colors.white;
 
   // 初期URL
-  final String initialUrl = 'https://cecile.yamateras.jp/visual';
+  late final int timestamp = DateTime.now().millisecondsSinceEpoch;
+  late final String initialUrl = 'https://cecile.yamateras.jp/visual?t=$timestamp';
   // メニューURL
   List<String> _urlList = [
     'https://cecile.yamateras.jp/visual',
@@ -755,6 +756,18 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     return new String.fromCharCodes(codeUnits);
   }
 
+  String addTimestampToUrl(String url) {
+    final uri = Uri.parse(url);
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+
+    // 既存のクエリパラメータを取得し、新しいタイムスタンプを追加
+    final newQueryParams = Map<String, String>.from(uri.queryParameters);
+    newQueryParams['t'] = timestamp;
+
+    // 新しいクエリパラメータでURLを再構築
+    return uri.replace(queryParameters: newQueryParams).toString();
+  }
+
   /**
    * BottomNavigation 切り替えで動作
    */
@@ -788,7 +801,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
         _showAppBar = false;
 
         if (_webviewIndex == 0){
-          _webViewLabController.loadRequest(Uri.parse(_urlList[index]));
+          _webViewLabController.loadRequest(Uri.parse(addTimestampToUrl(_urlList[index])));
           _inactive = false;
         }
         /*
@@ -799,7 +812,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
         }
         */
         else
-          _webViewController.loadRequest(Uri.parse(_urlList[index]));
+          _webViewController.loadRequest(Uri.parse(addTimestampToUrl(_urlList[index])));
         // Google Analyticsのイベントログ
         _analytics.logEvent(
           name: "menu_view",
