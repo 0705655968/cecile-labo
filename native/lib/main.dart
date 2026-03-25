@@ -154,6 +154,47 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   bool _inactive = false;
   String _initapp = '0';
 
+  /**
+   * セシラボ用ブラウザのフロント、AJAXの通信処理管理用
+   */
+  // フロント通信
+  bool _inProgress = false;
+  // AJAX通信監視
+  final String ajaxInterceptorJs = """
+(function() {
+    if (window.isAjaxHooked) return;
+    window.isAjaxHooked = true;
+
+    function notifyStart() {
+      if (window.Toaster) {
+        // 通信がブラウザから実際に飛び出す「直前」に、同期処理としてDartへ通知
+        window.Toaster.postMessage("AJAX_START");
+      }
+    }
+
+    function notifyEnd() {
+      if (window.Toaster) {
+        window.Toaster.postMessage("AJAX_END");
+      }
+    }
+
+    // 1. XMLHttpRequest (伝統的なAjax)
+    const origSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.send = function() {
+      notifyStart(); // 👈 実際の通信リクエストの直前に実行
+      this.addEventListener('loadend', notifyEnd);
+      return origSend.apply(this, arguments);
+    };
+
+    // 2. fetch API
+    const origFetch = window.fetch;
+    window.fetch = function() {
+      notifyStart(); // 👈 実際の通信リクエストの直前に実行
+      return origFetch.apply(this, arguments).finally(notifyEnd);
+    };
+  })();
+""";
+
   // 最終的なユーザーエージェント
   String _customUA = '';
 
@@ -207,9 +248,6 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     // iOSの場合、セシールサイトでエラー項目が表示されるので、Cookieをセットして回避する
     setCustRegistFlagToOne('cecile.co.jp');
 
-    // 今回表示する、おすすめURLを取得する
-    _onRecommendUri();
-
     // ローカルファイルに保存しているPush通知の情報があれば、
     // その情報を利用して、PopUpダイアログを表示する
     _timer = Timer.periodic(
@@ -246,15 +284,37 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     });
   }
 
+  /**
+   * WebViewの初期設定
+   */
   Future<void> initWebViewState() async {
     /**
      * セシールラボ用WebView
      */
     _webViewLabController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      // JSからのメッセージを受け取る口（JavaScriptChannel）を作る
+      ..addJavaScriptChannel(
+        'Toaster',
+        onMessageReceived: (JavaScriptMessage message) {
+          if (message.message == "AJAX_START") {
+            _inProgress = true;
+          } else if (message.message == "AJAX_END") {
+            _inProgress = false;
+          }
+        },
+      )
       ..setUserAgent(_customUA)
       ..setNavigationDelegate(
           NavigationDelegate(
+            /**
+             * プログレスバーの表示
+             */
+            onProgress: (int progress) {
+              setState(() {
+                _loadingProgress = progress; // 進捗を更新
+              });
+            },
             onNavigationRequest: (NavigationRequest request) {
               if ((!request.isMainFrame) ||
                   (initialUrl == request.url)) {
@@ -453,6 +513,22 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
                 }
               );
               return NavigationDecision.navigate;
+            },
+            onPageStarted: (String url) async {
+              setState(() {
+                _isLoading = true;
+                _inProgress = true;
+                _loadingProgress = 0; // 読み込み開始時にリセット
+              });
+            },
+            onPageFinished: (String url) async {
+              setState(() {
+                _isLoading = false;
+                _inProgress = false;
+                _loadingProgress = 100; // 完了
+              });
+              // ページの読み込みが終わったらフック用JSを埋め込む
+              _webViewLabController.runJavaScript(ajaxInterceptorJs);
             },
           )
       )
@@ -690,6 +766,9 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
 //      ..loadRequest(Uri.parse(initialUrl));
   }
 
+  /**
+   * プラットフォームの初期化
+   */
   Future<void> initPlatformState() async {
     _firebaseMessaging.getToken().then((token) async {
       token_id = "$token";
@@ -731,7 +810,6 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
         var _ssi = await File('${logDirectory.path}/ssi.data').readAsString();
         if (_ssi != ''){
           ssi_id = _ssi;
-          _onRecommendUri();
         }
       }
       catch(err){}
@@ -756,6 +834,9 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
     return new String.fromCharCodes(codeUnits);
   }
 
+  /**
+   * URLにタイムスタンプを付与して、キャッシュ表示を防止する
+   */
   String addTimestampToUrl(String url) {
     final uri = Uri.parse(url);
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
@@ -772,12 +853,15 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
    * BottomNavigation 切り替えで動作
    */
   void _onItemTapped(int index) {
+    // セシラボ通信中の場合、処理をさせない
+    if(_inProgress || _selectedIndex == index) return;
+
     _history_cnt = -1;
     setState(() {
       // アシスタントモードの場合、HTMLソースを保持する
       if(_selectedIndex == 2) {
         // ページ読み込み完了時にHTMLを取得
-        _getHtmlSource(_selectedIndex);
+        if(!_inProgress) _getHtmlSource(_selectedIndex);
       }
       // 表示するページのURL
       _selectedIndex = index;
@@ -891,36 +975,6 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   }
 
   /**
-   * 今のおすすめURLの取得処理
-   */
-  Future<void> _onRecommendUri() async {
-    /*
-    List _recommends = [
-      <String>[
-        'https://www.cecile.co.jp/feature/gift/',
-        'https://www.cecile.co.jp/genre/g1/1/UN/bargain/',
-      ],
-      <String>[
-        'https://lw.cecile.co.jp/feature/gift/',
-        'https://lw.cecile.co.jp/genre/g1/1/UN/bargain/',
-      ]
-    ];
-
-    try {
-      final dio = Dio();
-      final response = await dio.get(
-        'https://cecile-app.prm.bz/recommend?ssi='+ssi_id+'&did='+device_id,
-      );
-      _urlList[0][1] = response.data;
-      _urlList[1][1] = response.data;
-    } catch (err) {
-      _urlList[0][1] = _recommends[_accessPoint][math.Random().nextInt(2)];
-      _urlList[1][1] = _recommends[_accessPoint][math.Random().nextInt(2)];
-    }
-    */
-  }
-
-  /**
    * 下部メニューの背景色を動的に変更する
    */
   Color _getBgColor(int index) =>
@@ -1005,10 +1059,22 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
    * ブラウザの戻る処理
    */
   Future<bool> _willPopCallback() async {
+    // アシスタントモードの場合、HTMLソースを保持する
+    if(_selectedIndex == 2) {
+      // ページ読み込み完了時にHTMLを取得
+      if(!_inProgress) _getHtmlSource(_selectedIndex);
+    }
     if(_history_cnt>0){
-      if(_webviewIndex==1) _webViewController.goBack();
-      else _webViewLabController.goBack();
-      _history_cnt--;
+      if(_webviewIndex==1){
+        // セシールサイト側のブラウザ
+        _webViewController.goBack();
+        _history_cnt--;
+      }
+      else if(!_inProgress){
+        // 通信処理が完了した状態であれば、セシラボ側のブラウザの処理
+        _webViewLabController.goBack();
+        _history_cnt--;
+      }
     }
     return false;
   }
